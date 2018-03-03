@@ -21,12 +21,17 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author mwarman
@@ -38,14 +43,22 @@ public class MongoDBFindProducerTest extends MongoDBCase {
   @Before
   public void before() throws Exception{
     super.before();
-    MongoCollection<Document> collection = database.getCollection("collection");
+
+    FindIterable allIterable = mock(FindIterable.class);
+    FindIterable filteredIterable = mock(FindIterable.class);
+
+    doReturn(allIterable).when(collection).find(new Document());
+    doReturn(filteredIterable).when(collection).find(Document.parse(filter));
+
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
     Document document2 = new Document("name", "Fred's")
         .append("stars", 1)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
-    collection.insertMany(Arrays.asList(document, document2));
+
+    doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(allIterable).iterator();
+    doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
   }
 
   @Test

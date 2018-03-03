@@ -17,6 +17,7 @@
 package com.adaptris.core.mongodb;
 
 import com.adaptris.util.TimeInterval;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.minidev.json.JSONArray;
@@ -26,12 +27,14 @@ import net.minidev.json.parser.ParseException;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 /**
  * @author mwarman
@@ -40,6 +43,7 @@ public abstract class MongoDBCase {
 
   MongoDBConnection connection;
   MongoDatabase database;
+  MongoCollection collection;
 
   static final String COLLECTION = "collection";
 
@@ -47,14 +51,13 @@ public abstract class MongoDBCase {
 
   @Before
   public void before() throws Exception{
-    connection = new MongoDBConnection("mongodb://127.0.0.1:27017", "test");
-    database = connection.createDatabase(connection.createClient());
-  }
-
-  @After
-  public void after() {
-    MongoCollection<Document> collection = database.getCollection("collection");
-    collection.deleteMany(Document.parse("{}"));
+    connection = spy(new MongoDBConnection());
+    MongoClient mongoClient = mock(MongoClient.class);
+    database = mock(MongoDatabase.class);
+    doReturn(mongoClient).when(connection).createClient();
+    doReturn(database).when(connection).createDatabase(mongoClient);
+    collection = mock(MongoCollection.class);
+    doReturn(collection).when(database).getCollection(COLLECTION);
   }
 
   void assertJsonArraySize(String contents, int size) throws ParseException {

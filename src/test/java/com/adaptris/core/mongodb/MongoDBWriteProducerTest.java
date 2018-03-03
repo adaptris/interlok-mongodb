@@ -21,12 +21,14 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.util.LifecycleHelper;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * @author mwarman
  */
 public class MongoDBWriteProducerTest extends MongoDBCase {
 
+  @SuppressWarnings("unchecked")
   @Test
   public void produce() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer();
@@ -34,10 +36,11 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg, new ConfiguredDestination(COLLECTION));
-    assertRecordsArePresent(2);
+    Mockito.verify(collection, Mockito.times(2)).insertOne(Mockito.any());
     LifecycleHelper.stopAndClose(producer);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void produceNoArray() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer();
@@ -46,7 +49,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg, new ConfiguredDestination(COLLECTION));
-    assertRecordsArePresent(1);
+    Mockito.verify(collection, Mockito.times(1)).insertOne(Mockito.any());
     LifecycleHelper.stopAndClose(producer);
   }
 
