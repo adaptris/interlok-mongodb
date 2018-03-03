@@ -25,8 +25,6 @@ import com.mongodb.client.MongoCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.bson.Document;
 
-import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;
-
 /**
  * @author mwarman
  */

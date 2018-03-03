@@ -21,40 +21,23 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
-import com.adaptris.util.TimeInterval;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.bson.Document;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author mwarman
  */
-public class MongoDBFindProducerTest {
-
-  MongoDBConnection connection;
-  MongoDatabase database;
-
-  private static final TimeInterval TIMEOUT = new TimeInterval(2L, TimeUnit.MINUTES);
+public class MongoDBFindProducerTest extends MongoDBCase {
 
   private static final String filter = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
 
   @Before
   public void before() throws Exception{
-    connection = new MongoDBConnection("mongodb://127.0.0.1:27017", "test");
-    database = connection.createDatabase(connection.createClient());
+    super.before();
     MongoCollection<Document> collection = database.getCollection("collection");
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
@@ -63,12 +46,6 @@ public class MongoDBFindProducerTest {
         .append("stars", 1)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
     collection.insertMany(Arrays.asList(document, document2));
-  }
-
-  @After
-  public void after() {
-    MongoCollection<Document> collection = database.getCollection("collection");
-    collection.deleteMany(Document.parse("{}"));
   }
 
   @Test
@@ -95,15 +72,5 @@ public class MongoDBFindProducerTest {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  private void assertJsonArraySize(String contents, int size) throws ParseException {
-    final JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-    final Object object = jsonParser.parse(contents);
-    if (object instanceof JSONObject) {
-      fail();
-    } else if (object instanceof JSONArray) {
-      final JSONArray array = (JSONArray)object;
-      assertEquals(size, array.size());
-    }
-  }
 
 }

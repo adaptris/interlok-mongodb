@@ -20,42 +20,12 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.util.LifecycleHelper;
-import com.adaptris.util.TimeInterval;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author mwarman
  */
-public class MongoDBWriteProducerTest {
-
-  MongoDBConnection connection;
-  MongoDatabase database;
-
-  private static final String COLLECTION = "collection";
-  private static final TimeInterval TIMEOUT = new TimeInterval(2L, TimeUnit.MINUTES);
-  private static final String filter = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
-
-  @Before
-  public void before() throws Exception{
-    connection = new MongoDBConnection("mongodb://127.0.0.1:27017", "test");
-    database = connection.createDatabase(connection.createClient());
-  }
-
-  @After
-  public void after() {
-    MongoCollection<Document> collection = database.getCollection(COLLECTION);
-    collection.deleteMany(Document.parse("{}"));
-  }
+public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @Test
   public void produce() throws Exception{
@@ -80,9 +50,5 @@ public class MongoDBWriteProducerTest {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  private void assertRecordsArePresent(int expected){
-    MongoCollection<Document> collection = database.getCollection(COLLECTION);
-    ArrayList<Document> results = collection.find().into(new ArrayList<>());
-    assertEquals(expected, results.size());
-  }
+
 }
