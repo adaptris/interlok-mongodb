@@ -23,10 +23,23 @@ import com.adaptris.core.util.LifecycleHelper;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author mwarman
  */
 public class MongoDBWriteProducerTest extends MongoDBCase {
+
+  @Test
+  public void testSplitJsonArray() {
+    MongoDBWriteProducer producer = new MongoDBWriteProducer();
+    assertEquals(true, producer.getSplitJsonArray());
+    producer = new MongoDBWriteProducer().withJsonArray(false);
+    assertEquals(false, producer.getSplitJsonArray());
+    producer = new MongoDBWriteProducer();
+    producer.setSplitJsonArray(false);
+    assertEquals(false, producer.getSplitJsonArray());
+  }
 
   @SuppressWarnings("unchecked")
   @Test
@@ -43,15 +56,13 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
   @SuppressWarnings("unchecked")
   @Test
   public void produceNoArray() throws Exception{
-    MongoDBWriteProducer producer = new MongoDBWriteProducer();
+    MongoDBWriteProducer producer = new MongoDBWriteProducer().withJsonArray(false);
     producer.registerConnection(connection);
-    producer.setSplitJsonArray(false);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg, new ConfiguredDestination(COLLECTION));
     Mockito.verify(collection, Mockito.times(1)).insertOne(Mockito.any());
     LifecycleHelper.stopAndClose(producer);
   }
-
 
 }

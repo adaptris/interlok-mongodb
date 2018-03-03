@@ -44,11 +44,6 @@ public class MongoDBFindProducer extends MongoDBProducer {
   public MongoDBFindProducer() {
   }
 
-  public MongoDBFindProducer(DataInputParameter<String>  filter) {
-    setFilter(filter);
-  }
-
-
   @Override
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
     ObjectMapper mapper = new ObjectMapper();
@@ -78,5 +73,10 @@ public class MongoDBFindProducer extends MongoDBProducer {
 
   public void setFilter(DataInputParameter<String> filter) {
     this.filter = filter;
+  }
+
+  public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {
+    setFilter(filter);
+    return this;
   }
 }

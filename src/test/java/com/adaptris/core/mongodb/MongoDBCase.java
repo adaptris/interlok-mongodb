@@ -25,9 +25,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.bson.Document;
-import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;

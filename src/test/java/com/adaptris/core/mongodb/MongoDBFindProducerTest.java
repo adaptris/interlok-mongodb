@@ -21,8 +21,8 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,13 +30,15 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author mwarman
  */
-public class MongoDBFindProducerTest extends MongoDBCase {
+public class  MongoDBFindProducerTest extends MongoDBCase {
 
   private static final String filter = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
 
@@ -62,6 +64,18 @@ public class MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
+  public void testFilter() {
+    MongoDBFindProducer producer = new MongoDBFindProducer();
+    assertNull(producer.getFilter());
+    DataInputParameter<String> parameter = new StringPayloadDataInputParameter();
+    producer = new MongoDBFindProducer().withFilter(parameter);
+    assertEquals(parameter, producer.getFilter());
+    producer = new MongoDBFindProducer();
+    producer.setFilter(parameter);
+    assertEquals(parameter, producer.getFilter());
+  }
+
+  @Test
   public void doRequest() throws Exception{
     MongoDBFindProducer producer = new MongoDBFindProducer();
     producer.registerConnection(connection);
@@ -75,7 +89,7 @@ public class MongoDBFindProducerTest extends MongoDBCase {
 
   @Test
   public void doRequestWithFilter() throws Exception{
-    MongoDBFindProducer producer = new MongoDBFindProducer(new StringPayloadDataInputParameter());
+    MongoDBFindProducer producer = new MongoDBFindProducer().withFilter(new StringPayloadDataInputParameter());
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(filter);
     LifecycleHelper.initAndStart(producer);

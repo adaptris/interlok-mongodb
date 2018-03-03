@@ -31,13 +31,15 @@ import org.bson.Document;
 @XStreamAlias("mongodb-write-producer")
 public class MongoDBWriteProducer extends MongoDBProducer {
 
+  private static final Boolean DEFAULT_JSON_ARRAY = true;
+
   @AdvancedConfig
   @InputFieldDefault(value = "true")
   private Boolean splitJsonArray;
 
   public MongoDBWriteProducer(){
+    setSplitJsonArray(DEFAULT_JSON_ARRAY);
   }
-
 
   @Override
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
@@ -63,7 +65,7 @@ public class MongoDBWriteProducer extends MongoDBProducer {
   }
 
   private boolean splitJsonArray() {
-    return getSplitJsonArray() != null ? getSplitJsonArray().booleanValue() : true;
+    return getSplitJsonArray() != null ? getSplitJsonArray().booleanValue() : DEFAULT_JSON_ARRAY.booleanValue();
   }
 
   public void setSplitJsonArray(Boolean splitJsonArray) {
