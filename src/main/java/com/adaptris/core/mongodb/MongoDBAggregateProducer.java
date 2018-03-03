@@ -17,34 +17,46 @@
 package com.adaptris.core.mongodb;
 
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageFactory;
+import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.bson.BsonDocument;
 import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author mwarman
  */
-@XStreamAlias("mongodb-find-producer")
-public class MongoDBFindProducer extends MongoDBRetrieveProducer {
+@XStreamAlias("mongodb-aggregate-producer")
+public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
-  public MongoDBFindProducer() {
+  public MongoDBAggregateProducer() {
   }
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
-    return collection.find(createFilter(msg));
+    return collection.aggregate(createFilter(msg));
   }
 
-  private Document createFilter(AdaptrisMessage message) throws InterlokException {
-    return getFilter() != null ? Document.parse(getFilter().extract(message)) : new Document();
+
+  private List<Bson> createFilter(AdaptrisMessage message) throws InterlokException {
+    List<Bson> results = new ArrayList<>();
+    LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
+    for (AdaptrisMessage m : splitter.splitMessage(message)) {
+      results.add(BsonDocument.parse(m.getContent()));
+    }
+    return results;
   }
 
-  public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {
+  public MongoDBAggregateProducer withFilter(DataInputParameter<String> filter) {
     setFilter(filter);
     return this;
   }
-
 }
