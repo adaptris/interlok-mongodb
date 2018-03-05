@@ -38,8 +38,7 @@ import java.util.List;
  * Producer that executes aggregate MongoDB queries, results returned as JSON Array.
  *
  * <p>
- *   Example Pipeline:
- *
+ *   <b>Example Pipeline:</b><br/>
  *   Returns the count of stars
  * </p>
  * <p>
@@ -48,7 +47,8 @@ import java.util.List;
  *     {@code
  *     [
  *       { "name" : "Café Con Leche", "stars" : 3, "categories" : ["Bakery", "Coffee", "Pastries"] },
- *       { "name" : "Fred's", "stars" : 1, "categories" : ["Bakery", "Coffee", "Pastries"] } ]
+ *       { "name" : "Fred's", "stars" : 1, "categories" : ["Bakery", "Coffee", "Pastries"] }
+ *     ]
  *     }
  *   </pre>
  * </p>

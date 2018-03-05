@@ -32,8 +32,7 @@ import javax.validation.constraints.NotNull;
  * Producer that executes find MongoDB queries, results returned as JSON Array.
  *
  * <p>
- *   Example Filter:
- *
+ *   <b>Example Filter:</b><br/>
  *   Filters results stars greater than or equal to 2 and less that 5 with category of Bakery.
  * </p>
  * <p>
@@ -42,7 +41,8 @@ import javax.validation.constraints.NotNull;
  *     {@code
  *     [
  *       { "name" : "Café Con Leche", "stars" : 3, "categories" : ["Bakery", "Coffee", "Pastries"] },
- *       { "name" : "Fred's", "stars" : 1, "categories" : ["Bakery", "Coffee", "Pastries"] } ]
+ *       { "name" : "Fred's", "stars" : 1, "categories" : ["Bakery", "Coffee", "Pastries"] }
+ *     ]
  *     }
  *   </pre>
  * </p>
