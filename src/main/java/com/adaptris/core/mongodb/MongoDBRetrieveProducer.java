@@ -25,10 +25,8 @@ import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
-import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.bson.Document;
 
 import java.io.Writer;

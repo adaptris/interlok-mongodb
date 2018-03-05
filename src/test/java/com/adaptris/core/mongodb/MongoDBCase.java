@@ -16,6 +16,7 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.core.ProducerCase;
 import com.adaptris.util.TimeInterval;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -24,20 +25,16 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.bson.Document;
 import org.junit.Before;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 /**
  * @author mwarman
  */
-public abstract class MongoDBCase {
+public abstract class MongoDBCase extends ProducerCase {
 
   MongoDBConnection connection;
   MongoDatabase database;
@@ -48,12 +45,12 @@ public abstract class MongoDBCase {
   static final TimeInterval TIMEOUT = new TimeInterval(2L, TimeUnit.MINUTES);
 
   @Before
-  public void before() throws Exception{
+  public void setUp() throws Exception{
     connection = spy(new MongoDBConnection());
     MongoClient mongoClient = mock(MongoClient.class);
     database = mock(MongoDatabase.class);
-    doReturn(mongoClient).when(connection).createClient();
-    doReturn(database).when(connection).createDatabase(mongoClient);
+    doReturn(mongoClient).when(connection).retrieveMongoClient();
+    doReturn(database).when(connection).retrieveMongoDatabase();
     collection = mock(MongoCollection.class);
     doReturn(collection).when(database).getCollection(COLLECTION);
   }
@@ -68,11 +65,4 @@ public abstract class MongoDBCase {
       assertEquals(size, array.size());
     }
   }
-
-  void assertRecordsArePresent(int expected){
-    MongoCollection<Document> collection = database.getCollection(COLLECTION);
-    ArrayList<Document> results = collection.find().into(new ArrayList<>());
-    assertEquals(expected, results.size());
-  }
-
 }

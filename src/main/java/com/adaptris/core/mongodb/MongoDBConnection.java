@@ -16,8 +16,8 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.core.AdaptrisConnectionImp;
 import com.adaptris.core.CoreException;
-import com.adaptris.core.NoOpConnection;
 import com.adaptris.core.util.Args;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -29,10 +29,13 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @config mongodb-connection
  */
 @XStreamAlias("mongodb-connection")
-public class MongoDBConnection extends NoOpConnection{
+public class MongoDBConnection extends AdaptrisConnectionImp {
 
-  String connectionUri;
-  String database;
+  private String connectionUri;
+  private String database;
+
+  private transient MongoClient mongoClient;
+  private transient MongoDatabase mongoDatabase;
 
   public MongoDBConnection(){
   }
@@ -43,24 +46,47 @@ public class MongoDBConnection extends NoOpConnection{
     setDatabase(database);
   }
 
-  protected MongoClient createClient() throws CoreException {
-    return new MongoClient(new MongoClientURI(getConnectionUri()));
+  @Override
+  protected void prepareConnection() throws CoreException {
+
   }
 
-  protected MongoDatabase createDatabase(MongoClient client) throws CoreException {
-    return client.getDatabase(getDatabase());
+  @Override
+  protected void initConnection() throws CoreException {
+    mongoClient = new MongoClient(new MongoClientURI(getConnectionUri()));
+    mongoDatabase = mongoClient.getDatabase(getDatabase());
   }
 
-  protected void closeQuietly(MongoClient c) {
+  @Override
+  protected void startConnection() throws CoreException {
+
+  }
+
+  @Override
+  protected void stopConnection() {
+
+  }
+
+  @Override
+  protected void closeConnection() {
     try {
-      if (c != null) {
-        c.close();
+      if (mongoClient != null) {
+        mongoClient.close();
       }
     }
     catch (Exception ignored) {
-      ;
     }
+
   }
+
+  protected MongoClient retrieveMongoClient() {
+    return mongoClient;
+  }
+
+  protected MongoDatabase retrieveMongoDatabase() {
+    return mongoDatabase;
+  }
+
 
   public String getConnectionUri() {
     return connectionUri;

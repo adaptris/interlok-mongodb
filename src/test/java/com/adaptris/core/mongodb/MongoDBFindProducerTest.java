@@ -19,6 +19,8 @@ package com.adaptris.core.mongodb;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
+import com.adaptris.core.StandaloneProducer;
+import com.adaptris.core.common.ConstantDataInputParameter;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
@@ -30,8 +32,6 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -40,17 +40,17 @@ import static org.mockito.Mockito.mock;
  */
 public class  MongoDBFindProducerTest extends MongoDBCase {
 
-  private static final String filter = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
+  private static final String FILTER = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
 
   @Before
-  public void before() throws Exception{
-    super.before();
+  public void setUp() throws Exception{
+    super.setUp();
 
     FindIterable allIterable = mock(FindIterable.class);
     FindIterable filteredIterable = mock(FindIterable.class);
 
     doReturn(allIterable).when(collection).find(new Document());
-    doReturn(filteredIterable).when(collection).find(Document.parse(filter));
+    doReturn(filteredIterable).when(collection).find(Document.parse(FILTER));
 
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
@@ -76,7 +76,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void doRequest() throws Exception{
+  public void testDoRequest() throws Exception{
     MongoDBFindProducer producer = new MongoDBFindProducer();
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
@@ -88,10 +88,10 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void doRequestWithFilter() throws Exception{
+  public void testDoRequestWithFilter() throws Exception{
     MongoDBFindProducer producer = new MongoDBFindProducer().withFilter(new StringPayloadDataInputParameter());
     producer.registerConnection(connection);
-    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(filter);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(FILTER);
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
@@ -99,5 +99,13 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-
+  @Override
+  protected Object retrieveObjectForSampleConfig() {
+    return new StandaloneProducer(
+        new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBFindProducer()
+            .withFilter(new ConstantDataInputParameter(FILTER))
+            .withDestination(new ConfiguredDestination("collection"))
+    );
+  }
 }

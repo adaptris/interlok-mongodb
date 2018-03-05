@@ -18,6 +18,7 @@ package com.adaptris.core.mongodb;
 
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
+import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
@@ -33,6 +34,7 @@ import java.util.List;
 
 /**
  * @author mwarman
+ * @config mongodb-aggregate-producer
  */
 @XStreamAlias("mongodb-aggregate-producer")
 public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
@@ -57,6 +59,11 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   public MongoDBAggregateProducer withFilter(DataInputParameter<String> filter) {
     setFilter(filter);
+    return this;
+  }
+
+  public MongoDBAggregateProducer withDestination(ProduceDestination destination){
+    setDestination(destination);
     return this;
   }
 }

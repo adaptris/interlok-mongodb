@@ -19,11 +19,10 @@ package com.adaptris.core.mongodb;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
+import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author mwarman
@@ -33,7 +32,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void produce() throws Exception{
+  public void testProduce() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer();
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
@@ -45,7 +44,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void produceNoArray() throws Exception{
+  public void testProduceNoArray() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer();
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
@@ -55,4 +54,13 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
+
+  @Override
+  protected Object retrieveObjectForSampleConfig() {
+    return new StandaloneProducer(
+        new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBWriteProducer()
+            .withDestination(new ConfiguredDestination("collection"))
+    );
+  }
 }

@@ -43,8 +43,8 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
   @Override
   public void init() throws CoreException {
     MongoDBConnection connection = retrieveConnection(MongoDBConnection.class);
-    mongoClient = connection.createClient();
-    mongoDatabase = connection.createDatabase(getMongoClient());
+    mongoClient = connection.retrieveMongoClient();
+    mongoDatabase = connection.retrieveMongoDatabase();
   }
 
   @Override
@@ -59,7 +59,7 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
 
   @Override
   public void close() {
-    retrieveConnection(MongoDBConnection.class).closeQuietly(mongoClient);
+    //NOP
   }
 
   @Override

@@ -17,6 +17,7 @@
 package com.adaptris.core.mongodb;
 
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.ProduceDestination;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.MongoCollection;
@@ -26,6 +27,7 @@ import org.bson.Document;
 
 /**
  * @author mwarman
+ * @config mongodb-find-producer
  */
 @XStreamAlias("mongodb-find-producer")
 public class MongoDBFindProducer extends MongoDBRetrieveProducer {
@@ -44,6 +46,11 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {
     setFilter(filter);
+    return this;
+  }
+
+  public MongoDBFindProducer withDestination(ProduceDestination destination){
+    setDestination(destination);
     return this;
   }
 

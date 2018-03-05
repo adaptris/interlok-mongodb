@@ -19,6 +19,8 @@ package com.adaptris.core.mongodb;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
+import com.adaptris.core.StandaloneProducer;
+import com.adaptris.core.common.ConstantDataInputParameter;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
@@ -29,8 +31,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -40,10 +40,12 @@ import static org.mockito.Mockito.mock;
  */
 public class MongoDBAggregateProducerTest extends MongoDBCase {
 
+  private static final String FILTER = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
+
   @SuppressWarnings("unchecked")
   @Before
-  public void before() throws Exception{
-    super.before();
+  public void setUp() throws Exception{
+    super.setUp();
 
     AggregateIterable iterable = mock(AggregateIterable.class);
 
@@ -70,14 +72,23 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
 
   @Test
   public void testDoRequest() throws Exception{
-    String json  = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
     MongoDBAggregateProducer producer = new MongoDBAggregateProducer();
     producer.registerConnection(connection);
-    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(json);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(FILTER);
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);
+  }
+
+  @Override
+  protected Object retrieveObjectForSampleConfig() {
+    return new StandaloneProducer(
+        new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBAggregateProducer()
+            .withFilter(new ConstantDataInputParameter(FILTER))
+            .withDestination(new ConfiguredDestination("collection"))
+    );
   }
 }

@@ -16,12 +16,9 @@
 
 package com.adaptris.core.mongodb;
 
-import com.adaptris.annotation.AdvancedConfig;
-import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.ExceptionHelper;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +31,7 @@ import java.io.IOException;
 
 /**
  * @author mwarman
+ * @config mongodb-write-producer
  */
 @XStreamAlias("mongodb-write-producer")
 public class MongoDBWriteProducer extends MongoDBProducer {
@@ -69,6 +67,11 @@ public class MongoDBWriteProducer extends MongoDBProducer {
   private void parseAndSendDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
     collection.insertOne(document);
+  }
+
+  public MongoDBWriteProducer withDestination(ProduceDestination destination){
+    setDestination(destination);
+    return this;
   }
 
 }
