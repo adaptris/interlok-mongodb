@@ -21,9 +21,16 @@ import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.ExceptionHelper;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.bson.Document;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /**
  * @author mwarman
@@ -31,21 +38,21 @@ import org.bson.Document;
 @XStreamAlias("mongodb-write-producer")
 public class MongoDBWriteProducer extends MongoDBProducer {
 
-  private static final Boolean DEFAULT_JSON_ARRAY = true;
-
-  @AdvancedConfig
-  @InputFieldDefault(value = "true")
-  private Boolean splitJsonArray;
+  private static final Integer DEFAULT_BUFFER_SIZE = 8192;
 
   public MongoDBWriteProducer(){
-    setSplitJsonArray(DEFAULT_JSON_ARRAY);
   }
 
   @Override
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
     try {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
-      if (splitJsonArray()) {
+      ObjectMapper mapper = new ObjectMapper();
+      BufferedReader buf = new BufferedReader(msg.getReader(), DEFAULT_BUFFER_SIZE);
+      JsonParser parser = mapper.getFactory().createParser(buf);
+      if(parser.nextToken() == JsonToken.START_ARRAY) {
+        parser.close();
+        buf.close();
         LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
         for (AdaptrisMessage m : splitter.splitMessage(msg)) {
           parseAndSendDocument(collection, m);
@@ -54,7 +61,7 @@ public class MongoDBWriteProducer extends MongoDBProducer {
         parseAndSendDocument(collection, msg);
       }
       return reply;
-    } catch (CoreException e) {
+    } catch (CoreException | IOException e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
   }
@@ -64,20 +71,4 @@ public class MongoDBWriteProducer extends MongoDBProducer {
     collection.insertOne(document);
   }
 
-  private boolean splitJsonArray() {
-    return getSplitJsonArray() != null ? getSplitJsonArray().booleanValue() : DEFAULT_JSON_ARRAY.booleanValue();
-  }
-
-  public void setSplitJsonArray(Boolean splitJsonArray) {
-    this.splitJsonArray = splitJsonArray;
-  }
-
-  public Boolean getSplitJsonArray(){
-    return splitJsonArray;
-  }
-
-  public MongoDBWriteProducer withJsonArray(Boolean jsonArray) {
-    this.setSplitJsonArray(jsonArray);
-    return this;
-  }
 }

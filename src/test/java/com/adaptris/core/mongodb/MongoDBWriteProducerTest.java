@@ -30,16 +30,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class MongoDBWriteProducerTest extends MongoDBCase {
 
-  @Test
-  public void testSplitJsonArray() {
-    MongoDBWriteProducer producer = new MongoDBWriteProducer();
-    assertEquals(true, producer.getSplitJsonArray());
-    producer = new MongoDBWriteProducer().withJsonArray(false);
-    assertEquals(false, producer.getSplitJsonArray());
-    producer = new MongoDBWriteProducer();
-    producer.setSplitJsonArray(false);
-    assertEquals(false, producer.getSplitJsonArray());
-  }
 
   @SuppressWarnings("unchecked")
   @Test
@@ -56,7 +46,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
   @SuppressWarnings("unchecked")
   @Test
   public void produceNoArray() throws Exception{
-    MongoDBWriteProducer producer = new MongoDBWriteProducer().withJsonArray(false);
+    MongoDBWriteProducer producer = new MongoDBWriteProducer();
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
