@@ -40,7 +40,7 @@ import static org.mockito.Mockito.mock;
  */
 public class MongoDBAggregateProducerTest extends MongoDBCase {
 
-  private static final String FILTER = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
+  private static final String PIPELINE = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
 
   @SuppressWarnings("unchecked")
   @Before
@@ -58,23 +58,23 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testFilter() {
+  public void testPipeline() {
     MongoDBAggregateProducer producer = new MongoDBAggregateProducer();
-    assertNull(producer.getFilter());
+    assertNull(producer.getPipeline());
     DataInputParameter<String> parameter = new StringPayloadDataInputParameter();
-    producer = new MongoDBAggregateProducer().withFilter(parameter);
-    assertEquals(parameter, producer.getFilter());
+    producer = new MongoDBAggregateProducer().withPipeline(parameter);
+    assertEquals(parameter, producer.getPipeline());
     producer = new MongoDBAggregateProducer();
-    producer.setFilter(parameter);
-    assertEquals(parameter, producer.getFilter());
+    producer.setPipeline(parameter);
+    assertEquals(parameter, producer.getPipeline());
   }
 
 
   @Test
   public void testDoRequest() throws Exception{
-    MongoDBAggregateProducer producer = new MongoDBAggregateProducer();
+    MongoDBAggregateProducer producer = new MongoDBAggregateProducer().withPipeline(new StringPayloadDataInputParameter());
     producer.registerConnection(connection);
-    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(FILTER);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(PIPELINE);
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
@@ -87,7 +87,7 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBAggregateProducer()
-            .withFilter(new ConstantDataInputParameter(FILTER))
+            .withPipeline(new ConstantDataInputParameter(PIPELINE))
             .withDestination(new ConfiguredDestination("collection"))
     );
   }

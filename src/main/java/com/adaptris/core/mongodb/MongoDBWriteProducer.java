@@ -30,6 +30,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
+ * Producer that executes inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
+ *
  * @author mwarman
  * @config mongodb-write-producer
  */

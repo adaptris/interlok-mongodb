@@ -16,13 +16,11 @@
 
 package com.adaptris.core.mongodb;
 
-import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
-import com.adaptris.interlok.config.DataInputParameter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
@@ -36,8 +34,6 @@ import java.io.Writer;
  */
 public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
 
-  @AdvancedConfig
-  private DataInputParameter<String> filter;
 
   public MongoDBRetrieveProducer() {
   }
@@ -61,13 +57,5 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
   }
 
   protected abstract MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException;
-
-  public DataInputParameter<String> getFilter() {
-    return filter;
-  }
-
-  public void setFilter(DataInputParameter<String> filter) {
-    this.filter = filter;
-  }
 
 }

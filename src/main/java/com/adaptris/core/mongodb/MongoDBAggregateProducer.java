@@ -29,36 +29,85 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Producer that executes aggregate MongoDB queries, results returned as JSON Array.
+ *
+ * <p>
+ *   Example Pipeline:
+ *
+ *   Returns the count of stars
+ * </p>
+ * <p>
+ *   Data:
+ *   <pre>
+ *     {@code
+ *     [
+ *       { "name" : "Café Con Leche", "stars" : 3, "categories" : ["Bakery", "Coffee", "Pastries"] },
+ *       { "name" : "Fred's", "stars" : 1, "categories" : ["Bakery", "Coffee", "Pastries"] } ]
+ *     }
+ *   </pre>
+ * </p>
+ * <p>
+ *   Query:
+ *   <pre>
+ *     {@code
+ *     [{ "$group" : { "_id" : "$stars", "count" : { "$sum" : 1 } } }]
+ *     }
+ *   </pre>
+ * </p>
+ * <p>
+ *   Result:
+ *   <pre>
+ *     {@code
+ *     [ { "_id" : "1", "count" : "1" }, { "_id" : "3", "count" : "1" } ]
+ *     }
+ *   </pre>
+ * </p>
  * @author mwarman
  * @config mongodb-aggregate-producer
  */
 @XStreamAlias("mongodb-aggregate-producer")
 public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
+  @Valid
+  @NotNull
+  private DataInputParameter<String> pipeline;
+
+
   public MongoDBAggregateProducer() {
   }
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
-    return collection.aggregate(createFilter(msg));
+    return collection.aggregate(createPipeline(msg));
   }
 
 
-  private List<Bson> createFilter(AdaptrisMessage message) throws InterlokException {
+  private List<Bson> createPipeline(AdaptrisMessage message) throws InterlokException {
     List<Bson> results = new ArrayList<>();
     LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
-    for (AdaptrisMessage m : splitter.splitMessage(message)) {
+    for (AdaptrisMessage m : splitter.splitMessage(AdaptrisMessageFactory.getDefaultInstance().newMessage(getPipeline().extract(message)))) {
       results.add(BsonDocument.parse(m.getContent()));
     }
     return results;
   }
 
-  public MongoDBAggregateProducer withFilter(DataInputParameter<String> filter) {
-    setFilter(filter);
+  public DataInputParameter<String> getPipeline() {
+    return pipeline;
+  }
+
+  public void setPipeline(DataInputParameter<String> pipeline) {
+    this.pipeline = pipeline;
+  }
+
+
+  public MongoDBAggregateProducer withPipeline(DataInputParameter<String> filter) {
+    setPipeline(filter);
     return this;
   }
 

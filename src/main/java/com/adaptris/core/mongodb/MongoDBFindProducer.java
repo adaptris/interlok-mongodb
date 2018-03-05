@@ -25,12 +25,51 @@ import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.bson.Document;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 /**
+ * Producer that executes find MongoDB queries, results returned as JSON Array.
+ *
+ * <p>
+ *   Example Filter:
+ *
+ *   Filters results stars greater than or equal to 2 and less that 5 with category of Bakery.
+ * </p>
+ * <p>
+ *   Data:
+ *   <pre>
+ *     {@code
+ *     [
+ *       { "name" : "Café Con Leche", "stars" : 3, "categories" : ["Bakery", "Coffee", "Pastries"] },
+ *       { "name" : "Fred's", "stars" : 1, "categories" : ["Bakery", "Coffee", "Pastries"] } ]
+ *     }
+ *   </pre>
+ * </p>
+ * <p>
+ *   Query:
+ *   <pre>
+ *     {@code
+ *     { "stars" : { "$gte" : 2, "$lt" : 5 }, "categories" : "Bakery" }
+ *     }
+ *   </pre>
+ * </p>
+ * <p>
+ *   Result:
+ *   <pre>
+ *     {@code
+ *     [ { "name" : "Café Con Leche", "stars" : 3, "categories" : ["Bakery", "Coffee", "Pastries"] } ]
+ *     }
+ *   </pre>
+ * </p>
  * @author mwarman
  * @config mongodb-find-producer
  */
 @XStreamAlias("mongodb-find-producer")
 public class MongoDBFindProducer extends MongoDBRetrieveProducer {
+
+  @Valid
+  private DataInputParameter<String> filter;
 
   public MongoDBFindProducer() {
   }
@@ -42,6 +81,14 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   private Document createFilter(AdaptrisMessage message) throws InterlokException {
     return getFilter() != null ? Document.parse(getFilter().extract(message)) : new Document();
+  }
+
+  public DataInputParameter<String> getFilter() {
+    return filter;
+  }
+
+  public void setFilter(DataInputParameter<String> filter) {
+    this.filter = filter;
   }
 
   public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {
