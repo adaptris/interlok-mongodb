@@ -47,14 +47,24 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
   public void setUp() throws Exception{
     super.setUp();
 
-    AggregateIterable iterable = mock(AggregateIterable.class);
+    if(localTests){
+      Document document = new Document("name", "Café Con Leche")
+          .append("stars", 3)
+          .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+      Document document2 = new Document("name", "Fred's")
+          .append("stars", 1)
+          .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+      collection.insertMany(Arrays.asList(document, document2));
+    } else {
 
-    doReturn(iterable).when(collection).aggregate(any());
+      Document document = new Document("_id", "1").append("count", "1");
+      Document document2 = new Document("_id", "3").append("count", "1");
+      AggregateIterable iterable = mock(AggregateIterable.class);
 
-    Document document = new Document("_id", "1").append("count", "1");
-    Document document2 = new Document("_id", "3").append("count", "1");
+      doReturn(iterable).when(collection).aggregate(any());
 
-    doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(iterable).iterator();
+      doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(iterable).iterator();
+    }
   }
 
   @Test

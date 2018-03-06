@@ -29,12 +29,10 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -44,23 +42,14 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
 
   private static final String FILTER = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
   private static final String SORT ="{\"stars\" : 1}";
-  private static final Integer LIMIT = 5;
+  private static final Integer LIMIT = 1;
 
   FindIterable allIterable;
 
+  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception{
     super.setUp();
-
-    allIterable = mock(FindIterable.class);
-    FindIterable filteredIterable = mock(FindIterable.class);
-
-    doReturn(allIterable).when(collection).find(new Document());
-    doReturn(filteredIterable).when(collection).find(Document.parse(FILTER));
-
-    doReturn(allIterable).when(allIterable).sort(BsonDocument.parse(SORT));
-    doReturn(allIterable).when(allIterable).limit(LIMIT);
-
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
@@ -68,8 +57,22 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
         .append("stars", 1)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
 
-    doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(allIterable).iterator();
-    doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
+    if(localTests){
+      collection.insertMany(Arrays.asList(document, document2));
+    } else {
+      allIterable = mock(FindIterable.class);
+      FindIterable filteredIterable = mock(FindIterable.class);
+
+      doReturn(allIterable).when(collection).find(new Document());
+      doReturn(filteredIterable).when(collection).find(Document.parse(FILTER));
+
+      doReturn(allIterable).when(allIterable).sort(BsonDocument.parse(SORT));
+      doReturn(filteredIterable).when(allIterable).limit(LIMIT);
+
+
+      doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(allIterable).iterator();
+      doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
+    }
   }
 
   @Test
@@ -115,7 +118,9 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    verify(collection, times(1)).find(new Document());
+    if(!localTests) {
+      verify(collection, times(1)).find(new Document());
+    }
     assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);
   }
@@ -128,7 +133,9 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    verify(collection, times(1)).find(Document.parse(FILTER));
+    if(!localTests) {
+      verify(collection, times(1)).find(Document.parse(FILTER));
+    }
     assertJsonArraySize(result, 1);
     LifecycleHelper.stopAndClose(producer);
   }
@@ -141,8 +148,10 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    verify(collection, times(1)).find(new Document());
-    verify(allIterable, times(1)).sort(BsonDocument.parse(SORT));
+    if(!localTests) {
+      verify(collection, times(1)).find(new Document());
+      verify(allIterable, times(1)).sort(BsonDocument.parse(SORT));
+    }
     assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);
   }
@@ -155,9 +164,11 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    verify(collection, times(1)).find(new Document());
-    verify(allIterable, times(1)).limit(LIMIT);
-    assertJsonArraySize(result, 2);
+    if(!localTests) {
+      verify(collection, times(1)).find(new Document());
+      verify(allIterable, times(1)).limit(LIMIT);
+    }
+    assertJsonArraySize(result, 1);
     LifecycleHelper.stopAndClose(producer);
   }
 

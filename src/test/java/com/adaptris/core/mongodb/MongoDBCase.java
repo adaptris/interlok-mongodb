@@ -17,6 +17,7 @@
 package com.adaptris.core.mongodb;
 
 import com.adaptris.core.ProducerCase;
+import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.util.TimeInterval;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -25,6 +26,8 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.bson.Document;
+import org.junit.After;
 import org.junit.Before;
 
 import java.util.concurrent.TimeUnit;
@@ -40,19 +43,44 @@ public abstract class MongoDBCase extends ProducerCase {
   MongoDatabase database;
   MongoCollection collection;
 
+  final boolean localTests;
+  String connectionUri;
+
   static final String COLLECTION = "collection";
 
   static final TimeInterval TIMEOUT = new TimeInterval(2L, TimeUnit.MINUTES);
 
+  public MongoDBCase(){
+    localTests = PROPERTIES.getProperty("local.tests") != null && PROPERTIES.getProperty("local.tests").equals("true");
+    if(PROPERTIES.getProperty("local.test.connection.uri") != null) {
+      connectionUri = PROPERTIES.getProperty("local.test.connection.uri");
+    }
+  }
+
   @Before
   public void setUp() throws Exception{
-    connection = spy(new MongoDBConnection());
-    MongoClient mongoClient = mock(MongoClient.class);
-    database = mock(MongoDatabase.class);
-    doReturn(mongoClient).when(connection).retrieveMongoClient();
-    doReturn(database).when(connection).retrieveMongoDatabase();
-    collection = mock(MongoCollection.class);
-    doReturn(collection).when(database).getCollection(COLLECTION);
+    if(localTests){
+      connection = new MongoDBConnection(connectionUri, "database");
+      LifecycleHelper.initAndStart(connection);
+      database = connection.retrieveMongoDatabase();
+      collection = database.getCollection(COLLECTION);
+    } else {
+      connection = spy(new MongoDBConnection());
+      MongoClient mongoClient = mock(MongoClient.class);
+      database = mock(MongoDatabase.class);
+      doReturn(mongoClient).when(connection).retrieveMongoClient();
+      doReturn(database).when(connection).retrieveMongoDatabase();
+      collection = mock(MongoCollection.class);
+      doReturn(collection).when(database).getCollection(COLLECTION);
+    }
+  }
+
+  @After
+  public void tearDown(){
+    if (localTests){
+      collection.deleteMany(Document.parse("{}"));
+      LifecycleHelper.stopAndClose(connection);
+    }
   }
 
   void assertJsonArraySize(String contents, int size) throws ParseException {

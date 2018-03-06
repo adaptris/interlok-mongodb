@@ -21,8 +21,12 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
 
 /**
  * @author mwarman
@@ -38,7 +42,11 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg, new ConfiguredDestination(COLLECTION));
-    Mockito.verify(collection, Mockito.times(2)).insertOne(Mockito.any());
+    if(localTests){
+      assertRecordsArePresent(2);
+    } else {
+      Mockito.verify(collection, Mockito.times(2)).insertOne(Mockito.any());
+    }
     LifecycleHelper.stopAndClose(producer);
   }
 
@@ -50,7 +58,11 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg, new ConfiguredDestination(COLLECTION));
-    Mockito.verify(collection, Mockito.times(1)).insertOne(Mockito.any());
+    if(localTests){
+      assertRecordsArePresent(1);
+    } else {
+      Mockito.verify(collection, Mockito.times(1)).insertOne(Mockito.any());
+    }
     LifecycleHelper.stopAndClose(producer);
   }
 
@@ -62,5 +74,11 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
         new MongoDBWriteProducer()
             .withDestination(new ConfiguredDestination("collection"))
     );
+  }
+
+  private void assertRecordsArePresent(int expected){
+    MongoCollection<Document> collection = database.getCollection(COLLECTION);
+    ArrayList<Document> results = collection.find().into(new ArrayList<>());
+    assertEquals(expected, results.size());
   }
 }
