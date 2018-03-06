@@ -19,6 +19,7 @@ package com.adaptris.core.mongodb;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.interlok.InterlokException;
@@ -84,7 +85,8 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
   private DataInputParameter<String> sort;
 
   @Valid
-  private Integer limit;
+  @InputFieldHint(expression = true)
+  private String limit;
 
   public MongoDBFindProducer() {
   }
@@ -96,7 +98,7 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
       iterable  = iterable.sort(BsonDocument.parse(getSort().extract(msg)));
     }
     if (getLimit() !=  null){
-      iterable = iterable.limit(getLimit());
+      iterable = iterable.limit(Integer.parseInt(msg.resolve(getLimit())));
     }
     return iterable;
   }
@@ -121,11 +123,11 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
     this.sort = sort;
   }
 
-  public Integer getLimit() {
+  public String getLimit() {
     return limit;
   }
 
-  public void setLimit(Integer limit) {
+  public void setLimit(String limit) {
     this.limit = limit;
   }
 
@@ -144,7 +146,7 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
     return this;
   }
 
-  public MongoDBFindProducer withLimit(Integer limit){
+  public MongoDBFindProducer withLimit(String limit){
     setLimit(limit);
     return this;
   }

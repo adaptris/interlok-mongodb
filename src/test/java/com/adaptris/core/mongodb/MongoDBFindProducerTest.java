@@ -103,11 +103,11 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   public void testLimit() {
     MongoDBFindProducer producer = new MongoDBFindProducer();
     assertNull(producer.getLimit());
-    producer = new MongoDBFindProducer().withLimit(5);
-    assertEquals(5, producer.getLimit().intValue());
+    producer = new MongoDBFindProducer().withLimit("5");
+    assertEquals("5", producer.getLimit());
     producer = new MongoDBFindProducer();
-    producer.setLimit(5);
-    assertEquals(5, producer.getLimit().intValue());
+    producer.setLimit("5");
+    assertEquals("5", producer.getLimit());
   }
 
   @Test
@@ -158,9 +158,26 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
 
   @Test
   public void testDoRequestWithLimit() throws Exception{
-    MongoDBFindProducer producer = new MongoDBFindProducer().withLimit(LIMIT);
+    MongoDBFindProducer producer = new MongoDBFindProducer().withLimit(LIMIT.toString());
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    LifecycleHelper.initAndStart(producer);
+    producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    String result = msg.getContent();
+    if(!localTests) {
+      verify(collection, times(1)).find(new Document());
+      verify(allIterable, times(1)).limit(LIMIT);
+    }
+    assertJsonArraySize(result, 1);
+    LifecycleHelper.stopAndClose(producer);
+  }
+
+  @Test
+  public void testDoRequestWithLimitExpresion() throws Exception{
+    MongoDBFindProducer producer = new MongoDBFindProducer().withLimit("%message{limit}");
+    producer.registerConnection(connection);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    msg.addMetadata("limit", LIMIT.toString());
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
@@ -179,7 +196,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
         new MongoDBFindProducer()
             .withFilter(new ConstantDataInputParameter(FILTER))
             .withSort(new ConstantDataInputParameter("{\"stars\" : 1}"))
-            .withLimit(5)
+            .withLimit("5")
             .withDestination(new ConfiguredDestination("collection"))
     );
   }
