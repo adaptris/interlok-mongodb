@@ -25,15 +25,17 @@ import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.FindIterable;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author mwarman
@@ -41,16 +43,23 @@ import static org.mockito.Mockito.mock;
 public class  MongoDBFindProducerTest extends MongoDBCase {
 
   private static final String FILTER = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
+  private static final String SORT ="{\"stars\" : 1}";
+  private static final Integer LIMIT = 5;
+
+  FindIterable allIterable;
 
   @Before
   public void setUp() throws Exception{
     super.setUp();
 
-    FindIterable allIterable = mock(FindIterable.class);
+    allIterable = mock(FindIterable.class);
     FindIterable filteredIterable = mock(FindIterable.class);
 
     doReturn(allIterable).when(collection).find(new Document());
     doReturn(filteredIterable).when(collection).find(Document.parse(FILTER));
+
+    doReturn(allIterable).when(allIterable).sort(BsonDocument.parse(SORT));
+    doReturn(allIterable).when(allIterable).limit(LIMIT);
 
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
@@ -76,6 +85,29 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
+  public void testSort() {
+    MongoDBFindProducer producer = new MongoDBFindProducer();
+    assertNull(producer.getSort());
+    DataInputParameter<String> parameter = new StringPayloadDataInputParameter();
+    producer = new MongoDBFindProducer().withSort(parameter);
+    assertEquals(parameter, producer.getSort());
+    producer = new MongoDBFindProducer();
+    producer.setSort(parameter);
+    assertEquals(parameter, producer.getSort());
+  }
+
+  @Test
+  public void testLimit() {
+    MongoDBFindProducer producer = new MongoDBFindProducer();
+    assertNull(producer.getLimit());
+    producer = new MongoDBFindProducer().withLimit(5);
+    assertEquals(5, producer.getLimit().intValue());
+    producer = new MongoDBFindProducer();
+    producer.setLimit(5);
+    assertEquals(5, producer.getLimit().intValue());
+  }
+
+  @Test
   public void testDoRequest() throws Exception{
     MongoDBFindProducer producer = new MongoDBFindProducer();
     producer.registerConnection(connection);
@@ -83,6 +115,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
+    verify(collection, times(1)).find(new Document());
     assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);
   }
@@ -95,7 +128,36 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     LifecycleHelper.initAndStart(producer);
     producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
+    verify(collection, times(1)).find(Document.parse(FILTER));
     assertJsonArraySize(result, 1);
+    LifecycleHelper.stopAndClose(producer);
+  }
+
+  @Test
+  public void testDoRequestWithSort() throws Exception{
+    MongoDBFindProducer producer = new MongoDBFindProducer().withSort(new ConstantDataInputParameter(SORT));
+    producer.registerConnection(connection);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    LifecycleHelper.initAndStart(producer);
+    producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    String result = msg.getContent();
+    verify(collection, times(1)).find(new Document());
+    verify(allIterable, times(1)).sort(BsonDocument.parse(SORT));
+    assertJsonArraySize(result, 2);
+    LifecycleHelper.stopAndClose(producer);
+  }
+
+  @Test
+  public void testDoRequestWithLimit() throws Exception{
+    MongoDBFindProducer producer = new MongoDBFindProducer().withLimit(LIMIT);
+    producer.registerConnection(connection);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    LifecycleHelper.initAndStart(producer);
+    producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    String result = msg.getContent();
+    verify(collection, times(1)).find(new Document());
+    verify(allIterable, times(1)).limit(LIMIT);
+    assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);
   }
 
@@ -105,6 +167,8 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBFindProducer()
             .withFilter(new ConstantDataInputParameter(FILTER))
+            .withSort(new ConstantDataInputParameter("{\"stars\" : 1}"))
+            .withLimit(5)
             .withDestination(new ConfiguredDestination("collection"))
     );
   }

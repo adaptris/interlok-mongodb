@@ -23,9 +23,11 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.bson.BsonDocument;
 import org.bson.Document;
 
 import javax.validation.Valid;
@@ -72,18 +74,31 @@ import javax.validation.constraints.NotNull;
 @AdapterComponent
 @ComponentProfile(summary = "Executes find MongoDB queries, results returned as JSON Array.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
-@DisplayOrder(order = {"filter"})
+@DisplayOrder(order = {"filter", "sort", "limit"})
 public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   @Valid
   private DataInputParameter<String> filter;
+
+  @Valid
+  private DataInputParameter<String> sort;
+
+  @Valid
+  private Integer limit;
 
   public MongoDBFindProducer() {
   }
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
-    return collection.find(createFilter(msg));
+    FindIterable<Document> iterable =  collection.find(createFilter(msg));
+    if (getSort() != null){
+      iterable  = iterable.sort(BsonDocument.parse(getSort().extract(msg)));
+    }
+    if (getLimit() !=  null){
+      iterable = iterable.limit(getLimit());
+    }
+    return iterable;
   }
 
   private Document createFilter(AdaptrisMessage message) throws InterlokException {
@@ -98,6 +113,22 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
     this.filter = filter;
   }
 
+  public DataInputParameter<String> getSort() {
+    return sort;
+  }
+
+  public void setSort(DataInputParameter<String> sort) {
+    this.sort = sort;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
+
   public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {
     setFilter(filter);
     return this;
@@ -105,6 +136,16 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   public MongoDBFindProducer withDestination(ProduceDestination destination){
     setDestination(destination);
+    return this;
+  }
+
+  public MongoDBFindProducer withSort(DataInputParameter<String> sort){
+    setSort(sort);
+    return this;
+  }
+
+  public MongoDBFindProducer withLimit(Integer limit){
+    setLimit(limit);
     return this;
   }
 
