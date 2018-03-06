@@ -16,6 +16,9 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ProduceDestination;
@@ -72,6 +75,10 @@ import java.util.List;
  * @config mongodb-aggregate-producer
  */
 @XStreamAlias("mongodb-aggregate-producer")
+@AdapterComponent
+@ComponentProfile(summary = "Executes aggregate MongoDB queries, results returned as JSON Array.", tag = "producer,mongodb",
+    recommended = {MongoDBConnection.class})
+@DisplayOrder(order = {"pipeline"})
 public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   @Valid

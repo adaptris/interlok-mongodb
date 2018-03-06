@@ -16,6 +16,9 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.ExceptionHelper;
@@ -30,11 +33,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
- * Producer that executes inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
+ * Producer that inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
  *
  * @author mwarman
  * @config mongodb-write-producer
  */
+@AdapterComponent
+@ComponentProfile(summary = "Inserts JSON objects into MongoDB.", tag = "producer,mongodb",
+    recommended = {MongoDBConnection.class})
 @XStreamAlias("mongodb-write-producer")
 public class MongoDBWriteProducer extends MongoDBProducer {
 

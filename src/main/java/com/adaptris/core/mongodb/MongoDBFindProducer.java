@@ -16,6 +16,9 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.interlok.InterlokException;
@@ -66,6 +69,10 @@ import javax.validation.constraints.NotNull;
  * @config mongodb-find-producer
  */
 @XStreamAlias("mongodb-find-producer")
+@AdapterComponent
+@ComponentProfile(summary = "Executes find MongoDB queries, results returned as JSON Array.", tag = "producer,mongodb",
+    recommended = {MongoDBConnection.class})
+@DisplayOrder(order = {"filter"})
 public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   @Valid
