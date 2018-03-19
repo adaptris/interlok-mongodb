@@ -33,7 +33,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  */
 @XStreamAlias("mongodb-connection")
 @AdapterComponent
-@ComponentProfile(summary = "Executes aggregate MongoDB queries, results returned as JSON Array.", tag = "connections,mongodb")
+@ComponentProfile(summary = "Connect to MongoDB,", tag = "connections,mongodb")
 @DisplayOrder(order = {"connectionUri", "database"})
 public class MongoDBConnection extends AdaptrisConnectionImp {
 
