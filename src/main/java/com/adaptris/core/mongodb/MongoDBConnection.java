@@ -44,6 +44,7 @@ public class MongoDBConnection extends AdaptrisConnectionImp {
   private transient MongoDatabase mongoDatabase;
 
   public MongoDBConnection(){
+    //NOP
   }
 
   public MongoDBConnection(String connectionUri, String database){
@@ -54,7 +55,7 @@ public class MongoDBConnection extends AdaptrisConnectionImp {
 
   @Override
   protected void prepareConnection() throws CoreException {
-
+    //NOP
   }
 
   @Override
@@ -65,12 +66,12 @@ public class MongoDBConnection extends AdaptrisConnectionImp {
 
   @Override
   protected void startConnection() throws CoreException {
-
+    //NOP
   }
 
   @Override
   protected void stopConnection() {
-
+    //NOP
   }
 
   @Override

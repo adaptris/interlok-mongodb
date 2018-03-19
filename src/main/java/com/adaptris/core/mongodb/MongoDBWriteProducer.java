@@ -18,7 +18,6 @@ package com.adaptris.core.mongodb;
 
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
-import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.ExceptionHelper;
@@ -47,6 +46,7 @@ public class MongoDBWriteProducer extends MongoDBProducer {
   private static final Integer DEFAULT_BUFFER_SIZE = 8192;
 
   public MongoDBWriteProducer(){
+    //NOP
   }
 
   @Override

@@ -36,6 +36,7 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
 
 
   public MongoDBRetrieveProducer() {
+    //NOP
   }
 
   @Override

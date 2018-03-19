@@ -32,7 +32,6 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 /**
  * Producer that executes find MongoDB queries, results returned as JSON Array.
@@ -89,6 +88,7 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
   private String limit;
 
   public MongoDBFindProducer() {
+    //NOP
   }
 
   @Override

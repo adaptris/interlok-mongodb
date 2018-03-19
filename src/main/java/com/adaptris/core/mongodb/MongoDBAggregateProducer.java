@@ -87,6 +87,7 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
 
   public MongoDBAggregateProducer() {
+    //NOP
   }
 
   @Override
