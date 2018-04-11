@@ -32,27 +32,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
- * Producer that inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
+ * Producer that delete JSON objects from MongoDB, if a JSON array is given the array will be split and delete as individual JSON objects.
  *
  * @author mwarman
  * @config mongodb-write-producer
  */
 @AdapterComponent
-@ComponentProfile(summary = "Inserts JSON objects into MongoDB.", tag = "producer,mongodb",
+@ComponentProfile(summary = "Delete JSON objects from MongoDB.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
-@XStreamAlias("mongodb-write-producer")
-public class MongoDBWriteProducer extends MongoDBArrayProducer {
+@XStreamAlias("mongodb-delete-producer")
+public class MongoDBDeleteProducer extends MongoDBArrayProducer {
 
-  public MongoDBWriteProducer(){
+  public MongoDBDeleteProducer(){
     //NOP
   }
 
   public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
-    collection.insertOne(document);
+    collection.deleteOne(document);
   }
 
-  public MongoDBWriteProducer withDestination(ProduceDestination destination){
+  public MongoDBDeleteProducer withDestination(ProduceDestination destination){
     setDestination(destination);
     return this;
   }
