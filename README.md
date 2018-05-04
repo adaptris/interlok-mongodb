@@ -1,0 +1,3 @@
+# interlok-mongodb [![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-mongodb.svg)](https://github.com/adaptris/interlok-mongodb/tags) [![Build Status](https://travis-ci.org/adaptris/interlok-mongodb.svg?branch=develop)](https://travis-ci.org/adaptris/interlok-mongodb) [![codecov](https://codecov.io/gh/adaptris/interlok-mongodb/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-mongodb) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8b709dd249a24ecd90b69533aa08d441)](https://www.codacy.com/app/adaptris/interlok-mongodb?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adaptris/interlok-mongodb&amp;utm_campaign=Badge_Grade)
+
+`ideal-potato` was the suggested project name
