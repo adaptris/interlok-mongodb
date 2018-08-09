@@ -166,11 +166,12 @@ publishing {
       artifact examplesJar { classifier "examples" }
 
       pom.withXml {
+        asNode().appendNode("name", componentName)
         asNode().appendNode("description", "Services and Connections for interacting with MongoDB")
         def properties = asNode().appendNode("properties")
         properties.appendNode("target", "3.7.0+")
         properties.appendNode("license", "false")
-        properties.appendNode("tags", "mongodb")        
+        properties.appendNode("tags", "mongodb,db")        
       }
     }
   }
