@@ -36,13 +36,6 @@ def versionDir = "$buildDir/version"
 repositories {
   maven { url "$defaultNexusRepo" }
   maven { url "https://development.adaptris.net/nexus/content/groups/public" }
-  maven {
-    credentials {
-      username repoUsername
-      password repoPassword
-    }
-    url "https://development.adaptris.net/nexus/content/groups/private"
-  }
   maven { url "https://development.adaptris.net/nexus/content/repositories/snapshots" }
   maven { url "https://development.adaptris.net/nexus/content/repositories/releases" }
 }
@@ -59,6 +52,7 @@ configurations {
   all*.exclude group: 'net.sf.saxon', module: 'saxon'
   all*.exclude group: 'org.codehaus.woodstox'
   all*.exclude group: 'org.eclipse.jetty.orbit', module: 'javax.mail.glassfish'
+  all*.exclude group: 'com.fasterxml.woodstox'
 }
 
 configurations.all {
@@ -72,6 +66,7 @@ dependencies {
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
   compile ("org.mongodb:mongodb-driver:3.8.0")
   compile ("com.fasterxml.jackson.core:jackson-databind:2.9.6")
+  annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testCompile ("junit:junit:4.12")
   testCompile ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing= true}
