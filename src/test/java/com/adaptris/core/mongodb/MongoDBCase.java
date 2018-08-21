@@ -78,7 +78,7 @@ public abstract class MongoDBCase extends ProducerCase {
   @After
   public void tearDown(){
     if (localTests){
-      collection.deleteMany(Document.parse("{}"));
+      clearData();
       LifecycleHelper.stopAndClose(connection);
     }
   }
@@ -91,6 +91,12 @@ public abstract class MongoDBCase extends ProducerCase {
     } else if (object instanceof JSONArray) {
       final JSONArray array = (JSONArray)object;
       assertEquals(size, array.size());
+    }
+  }
+
+  void clearData(){
+    if (localTests){
+      collection.deleteMany(Document.parse("{}"));
     }
   }
 }

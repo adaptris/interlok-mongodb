@@ -19,6 +19,7 @@ package com.adaptris.core.mongodb;
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.interlok.InterlokException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,11 +54,11 @@ public abstract class MongoDBArrayProducer extends MongoDBProducer {
         parseAndActionDocument(collection, msg);
       }
       return reply;
-    } catch (CoreException | IOException e) {
+    } catch (InterlokException | IOException e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
   }
 
-  public abstract void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message);
+  public abstract void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message) throws InterlokException;
 
 }
