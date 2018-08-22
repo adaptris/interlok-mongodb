@@ -28,7 +28,7 @@ import java.util.List;
 @XStreamAlias("mongodb-replace-producer")
 public class MongoDBReplaceProducer extends MongoDBArrayProducer {
 
-  @XStreamImplicit(itemFieldName = "filter-fields")
+  @XStreamImplicit(itemFieldName = "filter-field")
   private List<String> filterFields = new ArrayList<>();
 
   private Boolean upsert;
