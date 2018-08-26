@@ -86,11 +86,11 @@ public abstract class MongoDBCase extends ProducerCase {
   void assertJsonArraySize(String contents, int size) throws ParseException {
     final JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
     final Object object = jsonParser.parse(contents);
-    if (object instanceof JSONObject) {
-      fail();
-    } else if (object instanceof JSONArray) {
+    if (object instanceof JSONArray) {
       final JSONArray array = (JSONArray)object;
       assertEquals(size, array.size());
+    } else {
+      fail("JSON Array expected");
     }
   }
 
