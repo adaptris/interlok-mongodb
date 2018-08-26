@@ -8,6 +8,7 @@ import com.adaptris.interlok.InterlokException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
@@ -17,33 +18,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Producer that replaces JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
+ * Producer that updates JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
+ *
+ * Producer assumes you've formatted the json in required format:
+ *
+ * <p>
+ *   Result:
+ *   <pre>
+ *     {@code
+ *     [ { "$set" : { "stars" : "4" } } ]
+ *     }
+ *   </pre>
+ * </p>
  *
  * @author mwarman
- * @config mongodb-replace-producer
+ * @config mongodb-update-producer
  */
 @AdapterComponent
-@ComponentProfile(summary = "Replace JSON objects into MongoDB.", tag = "producer,mongodb",
+@ComponentProfile(summary = "Update JSON objects into MongoDB.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
-@XStreamAlias("mongodb-replace-producer")
-public class MongoDBReplaceProducer extends MongoDBUpdateReplaceProducer {
+@XStreamAlias("mongodb-update-producer")
+public class MongoDBUpdateProducer extends MongoDBUpdateReplaceProducer {
+
 
   @Override
   void actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
-    collection.replaceOne(filter, document, new ReplaceOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
+    collection.updateOne(filter, document, new UpdateOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
   }
 
-  public MongoDBReplaceProducer withFilterFields(List<String> filterFields) {
+  public MongoDBUpdateProducer withFilterFields(List<String> filterFields) {
     setFilterFields(filterFields);
     return this;
   }
 
-  public MongoDBReplaceProducer withUpsert(Boolean upsert){
+  public MongoDBUpdateProducer withUpsert(Boolean upsert){
     setUpsert(upsert);
     return this;
   }
 
-  public MongoDBReplaceProducer withDestination(ProduceDestination destination){
+  public MongoDBUpdateProducer withDestination(ProduceDestination destination){
     setDestination(destination);
     return this;
   }
