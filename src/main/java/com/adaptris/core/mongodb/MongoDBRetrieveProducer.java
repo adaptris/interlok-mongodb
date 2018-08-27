@@ -47,8 +47,10 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
       generator.writeStartArray();
       MongoIterable<Document> results = retrieveResults(collection, msg);
-      for(Document document : results){
-        generator.writeRawValue(document.toJson());
+      if(results != null) {
+        for (Document document : results) {
+          generator.writeRawValue(document.toJson());
+        }
       }
       generator.writeEndArray();
       return reply;

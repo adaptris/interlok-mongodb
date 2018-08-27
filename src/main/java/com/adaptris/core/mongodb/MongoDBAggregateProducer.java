@@ -26,6 +26,7 @@ import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -89,6 +90,9 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
   @AdvancedConfig
   private Boolean allowDiskUse;
 
+  @AdvancedConfig
+  private Boolean toCollection;
+
 
   public MongoDBAggregateProducer() {
     //NOP
@@ -96,7 +100,13 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
-    return collection.aggregate(createPipeline(msg)).allowDiskUse(allowDiskUse());
+    AggregateIterable<Document> results = collection.aggregate(createPipeline(msg)).allowDiskUse(allowDiskUse());
+    if(toCollection()) {
+      results.toCollection();
+      return null;
+    } else {
+      return results;
+    }
   }
 
 
@@ -127,6 +137,18 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   boolean allowDiskUse(){
     return getAllowDiskUse() != null ? getAllowDiskUse() : false;
+  }
+
+  public Boolean getToCollection() {
+    return toCollection;
+  }
+
+  public void setToCollection(Boolean toCollection) {
+    this.toCollection = toCollection;
+  }
+
+  boolean toCollection(){
+    return getToCollection() != null ? getToCollection() : false;
   }
 
   public MongoDBAggregateProducer withPipeline(DataInputParameter<String> filter) {
