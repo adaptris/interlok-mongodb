@@ -17,6 +17,7 @@
 package com.adaptris.core.mongodb;
 
 import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
@@ -85,6 +86,9 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
   @NotNull
   private DataInputParameter<String> pipeline;
 
+  @AdvancedConfig
+  private Boolean allowDiskUse;
+
 
   public MongoDBAggregateProducer() {
     //NOP
@@ -92,7 +96,7 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
-    return collection.aggregate(createPipeline(msg));
+    return collection.aggregate(createPipeline(msg)).allowDiskUse(allowDiskUse());
   }
 
 
@@ -113,6 +117,17 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
     this.pipeline = pipeline;
   }
 
+  public Boolean getAllowDiskUse() {
+    return allowDiskUse;
+  }
+
+  public void setAllowDiskUse(Boolean allowDiskUse) {
+    this.allowDiskUse = allowDiskUse;
+  }
+
+  boolean allowDiskUse(){
+    return getAllowDiskUse() != null ? getAllowDiskUse() : false;
+  }
 
   public MongoDBAggregateProducer withPipeline(DataInputParameter<String> filter) {
     setPipeline(filter);
