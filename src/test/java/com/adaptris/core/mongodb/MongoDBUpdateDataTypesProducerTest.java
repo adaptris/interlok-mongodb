@@ -28,6 +28,7 @@ import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.bson.types.Decimal128;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -55,6 +56,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
         .append("date", "2018-01-01")
         .append("integer", "1")
         .append("double", "1.1")
+        .append("decimal128", "1.1")
         .append("long", "1")
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
     Document document2 = new Document("name", "Fred's")
@@ -63,6 +65,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
         .append("date", "2018-01-01")
         .append("integer", "1")
         .append("double", "1.1")
+        .append("decimal128", "1.1")
         .append("long", "1")
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
 
@@ -104,7 +107,8 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
             new DateValueConverter("date", "yyyy-MM-dd"),
             new IntegerValueConverter("integer"),
             new LongValueConverter("long"),
-            new DoubleValueConverter("double")
+            new DoubleValueConverter("double"),
+            new Decimal128ValueConverter("decimal128")
         )
     );
     producer.registerConnection(connection);
@@ -131,6 +135,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     assertTrue(result.get("integer") instanceof Integer);
     assertTrue(result.get("long") instanceof Long);
     assertTrue(result.get("double") instanceof Double);
+    assertTrue(result.get("decimal128") instanceof Decimal128);
     LifecycleHelper.stopAndClose(producer);
   }
 
