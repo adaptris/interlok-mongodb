@@ -17,7 +17,11 @@ public abstract class ValueConverter<T> {
   }
 
   public T convert(Document original){
-    return valueOf(original.get(getKey()));
+    Object value = original.get(getKey());
+    if (value == null){
+      return null;
+    }
+    return valueOf(value);
   }
 
   abstract T valueOf(Object o);
