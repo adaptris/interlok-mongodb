@@ -58,7 +58,7 @@ public class MongoDBWriteProducer extends MongoDBArrayProducer {
   public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
     for(ValueConverter valueConverter : getValueConverters()){
-      document.put(valueConverter.getKey(), valueConverter.convert(document));
+      document.put(valueConverter.key(), valueConverter.convert(document));
     }
     collection.insertOne(document);
   }

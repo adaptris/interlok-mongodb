@@ -33,7 +33,7 @@ public class MongoDBReplaceProducer extends MongoDBUpdateReplaceProducer {
   @Override
   void actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
     for(ValueConverter valueConverter : getValueConverters()){
-      document.put(valueConverter.getKey(), valueConverter.convert(document));
+      document.put(valueConverter.key(), valueConverter.convert(document));
     }
     collection.replaceOne(filter, document, new ReplaceOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
   }

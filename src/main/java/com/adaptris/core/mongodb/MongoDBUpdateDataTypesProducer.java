@@ -53,7 +53,7 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
         ObjectId id = original.getObjectId("_id");
         LinkedHashMap<String, Object> updates = new LinkedHashMap<>();
         for(ValueConverter valueConverter : getValueConverters()){
-          updates.put(valueConverter.getKey(), valueConverter.convert(original));
+          updates.put(valueConverter.key(), valueConverter.convert(original));
         }
         Document result = new Document();
         result.put("$set", updates);

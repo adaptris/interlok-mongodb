@@ -6,6 +6,7 @@ import org.bson.Document;
 public abstract class ValueConverter<T> {
 
   private String key;
+  private String outputKey;
 
   public ValueConverter(){
 
@@ -27,5 +28,17 @@ public abstract class ValueConverter<T> {
 
   public void setKey(String key) {
     this.key = Args.notEmpty(key, "key");
+  }
+
+  public String getOutputKey() {
+    return outputKey;
+  }
+
+  public void setOutputKey(String outputKey) {
+    this.outputKey = Args.notEmpty(outputKey, "outputKey");
+  }
+
+  String key(){
+    return getOutputKey() != null ? getOutputKey() : getKey();
   }
 }
