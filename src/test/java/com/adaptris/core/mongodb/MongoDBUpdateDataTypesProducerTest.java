@@ -54,6 +54,8 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
         .append("stars", 3)
         .append("string", 1)
         .append("date", "2018-01-01")
+        .append("milliseconds", "2018-01-01")
+        .append("dateAsDate", new Date())
         .append("dateNull", null)
         .append("integer", "1")
         .append("double", "1.1")
@@ -64,6 +66,8 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
         .append("stars", 1)
         .append("string", 1)
         .append("date", "2018-01-01")
+        .append("milliseconds", "2018-01-01")
+        .append("dateAsDate", new Date())
         .append("dateNull", null)
         .append("integer", "1")
         .append("double", "1.1")
@@ -108,6 +112,8 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
             new StringValueConverter("string"),
             new DateValueConverter("date", "yyyy-MM-dd"),
             new DateValueConverter("dateNull", "yyyy-MM-dd"),
+            new MillisecondsValueConverter("dateAsDate", "yyyy-MM-dd"),
+            new MillisecondsValueConverter("milliseconds", "yyyy-MM-dd"),
             new IntegerValueConverter("integer"),
             new LongValueConverter("long"),
             new DoubleValueConverter("double"),
@@ -137,7 +143,9 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     assertTrue(result.get("date") instanceof Date);
     assertNull(result.get("dateNull"));
     assertTrue(result.get("integer") instanceof Integer);
+    assertTrue(result.get("milliseconds") instanceof Long);
     assertTrue(result.get("long") instanceof Long);
+    assertTrue(result.get("dateAsDate") instanceof Long);
     assertTrue(result.get("double") instanceof Double);
     assertTrue(result.get("decimal128") instanceof Decimal128);
     LifecycleHelper.stopAndClose(producer);

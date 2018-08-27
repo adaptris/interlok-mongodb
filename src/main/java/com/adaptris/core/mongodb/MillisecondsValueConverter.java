@@ -9,7 +9,6 @@ import java.util.Date;
 @XStreamAlias("mongodb-milliseconds-value-converter")
 public class MillisecondsValueConverter extends ValueConverter<Long> {
 
-  @NotBlank
   private String dateFormat;
 
   private transient SimpleDateFormat dateFormatter = null;
@@ -26,7 +25,11 @@ public class MillisecondsValueConverter extends ValueConverter<Long> {
   @Override
   Long valueOf(Object o) {
     try {
-      return getDateFormatter().parse((String) o).getTime();
+      if(o instanceof Date){
+        return ((Date) o).getTime();
+      } else {
+        return getDateFormatter().parse((String) o).getTime();
+      }
     } catch (Exception e){
       throw new IllegalArgumentException(String.format("Failed to convert input string [%s] to type data", o), e);
     }

@@ -2,9 +2,11 @@ package com.adaptris.core.mongodb;
 
 import com.adaptris.core.util.Args;
 import org.bson.Document;
+import org.hibernate.validator.constraints.NotBlank;
 
 public abstract class ValueConverter<T> {
 
+  @NotBlank
   private String key;
   private String outputKey;
 
