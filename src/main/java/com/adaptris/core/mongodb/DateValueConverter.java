@@ -1,6 +1,7 @@
 package com.adaptris.core.mongodb;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
 
 import java.text.SimpleDateFormat;
@@ -26,9 +27,13 @@ public class DateValueConverter extends ValueConverter<Date> {
   @Override
   Date valueOf(Object o) {
     try {
-      return getDateFormatter().parse((String) o);
+      if(StringUtils.isEmpty((String) o)) {
+        return null;
+      } else {
+        return getDateFormatter().parse((String) o);
+      }
     } catch (Exception e){
-      throw new IllegalArgumentException(String.format("Failed to convert input string [%s] to type data", o), e);
+      throw new IllegalArgumentException(String.format("Failed to convert input string [%s] to type date", o), e);
     }
   }
 
