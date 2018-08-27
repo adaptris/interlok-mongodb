@@ -74,7 +74,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     if(localTests){
       assertRecordsArePresent(2);
     } else {
-      verifyRecordCounts(2, true);
+      verifyUpdateCounts(2, true);
     }
     LifecycleHelper.stopAndClose(producer);
   }
@@ -93,7 +93,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     if(localTests){
       assertRecordsArePresent(1);
     } else {
-      verifyRecordCounts(1, true);
+      verifyUpdateCounts(1, true);
     }
     LifecycleHelper.stopAndClose(producer);
   }
@@ -112,7 +112,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     if(localTests){
       assertRecordsArePresent(0);
     } else {
-      verifyRecordCounts(2, false);
+      verifyUpdateCounts(2, false);
     }
     LifecycleHelper.stopAndClose(producer);
   }
@@ -131,7 +131,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     if(localTests){
       assertRecordsArePresent(0);
     } else {
-      verifyRecordCounts(1, false);
+      verifyUpdateCounts(1, false);
     }
     LifecycleHelper.stopAndClose(producer);
   }
@@ -149,7 +149,26 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     if(localTests){
       assertRecordsArePresent(2);
     } else {
-      verifyRecordCounts(1, true);
+      verifyUpdateCounts(1, true);
+    }
+    LifecycleHelper.stopAndClose(producer);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testProduceUpsertNoArrayDataValueConverter() throws Exception{
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    producer.setFilterFields(Collections.singletonList("name"));
+    producer.registerConnection(connection);
+    producer.setUpsert(true);
+    producer.setValueConverters(Collections.singletonList(new IntegerValueConverter("stars")));
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"name\": \"Fred's\", \"stars\": \"2\"}");
+    LifecycleHelper.initAndStart(producer);
+    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    if(localTests){
+      assertRecordsArePresent(2);
+    } else {
+      verifyUpdateCounts(1, true);
     }
     LifecycleHelper.stopAndClose(producer);
   }
@@ -173,7 +192,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @SuppressWarnings("unchecked")
-  private void verifyRecordCounts(int expected, boolean upsert) {
+  private void verifyUpdateCounts(int expected, boolean upsert) {
     ArgumentCaptor<ReplaceOptions> argument = ArgumentCaptor.forClass(ReplaceOptions.class);
     Mockito.verify(collection, Mockito.times(expected)).replaceOne(Mockito.any(Bson.class), Mockito.any(), argument.capture());
     assertEquals(expected, argument.getAllValues().size());

@@ -2,17 +2,15 @@ package com.adaptris.core.mongodb;
 
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
-import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
-import com.adaptris.interlok.InterlokException;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +26,24 @@ import java.util.List;
 @XStreamAlias("mongodb-replace-producer")
 public class MongoDBReplaceProducer extends MongoDBUpdateReplaceProducer {
 
+  @Valid
+  @XStreamImplicit
+  private List<ValueConverter> valueConverters = new ArrayList<>();
+
   @Override
   void actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
+    for(ValueConverter valueConverter : getValueConverters()){
+      document.put(valueConverter.getKey(), valueConverter.convert(document));
+    }
     collection.replaceOne(filter, document, new ReplaceOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
+  }
+
+  public List<ValueConverter> getValueConverters() {
+    return valueConverters;
+  }
+
+  public void setValueConverters(List<ValueConverter> valueConverters) {
+    this.valueConverters = valueConverters;
   }
 
   public MongoDBReplaceProducer withFilterFields(List<String> filterFields) {
