@@ -36,7 +36,7 @@ public class FlattenJsonOutputSettingsTest {
     assertEquals(23.4, result.get("d"));
     assertEquals(1, result.get("d128"));
     //because timezones
-    assertTrue(result.get("date").toString().startsWith("2018-07-19T"));
+    assertTrue(result.get("date").toString().startsWith("2018-07"));
   }
 
 }
