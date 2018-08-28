@@ -38,6 +38,9 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
   @AdvancedConfig
   private Integer batchSize;
 
+  @AdvancedConfig
+  private JsonOutputSettings jsonOutputSettings = new DefaultJsonOutputSettings();
+
 
   public MongoDBRetrieveProducer() {
     //NOP
@@ -56,7 +59,7 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
       }
       if(results != null) {
         for (Document document : results) {
-          generator.writeRawValue(document.toJson());
+          generator.writeRawValue(document.toJson(getJsonOutputSettings().settings()));
         }
       }
       generator.writeEndArray();
@@ -75,5 +78,13 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
 
   public void setBatchSize(Integer batchSize) {
     this.batchSize = batchSize;
+  }
+
+  public JsonOutputSettings getJsonOutputSettings() {
+    return jsonOutputSettings;
+  }
+
+  public void setJsonOutputSettings(JsonOutputSettings jsonOutputSettings) {
+    this.jsonOutputSettings = jsonOutputSettings;
   }
 }
