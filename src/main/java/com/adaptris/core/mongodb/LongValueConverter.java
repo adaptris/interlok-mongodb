@@ -15,6 +15,6 @@ public class LongValueConverter extends ValueConverter<Long> {
 
   @Override
   Long valueOf(Object o) {
-    return Long.valueOf((String)o);
+    return Long.valueOf(String.valueOf(o));
   }
 }

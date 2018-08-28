@@ -29,10 +29,10 @@ public class MillisecondsValueConverter extends ValueConverter<Long> {
       if(o instanceof Date){
         return ((Date) o).getTime();
       } else {
-        if(StringUtils.isEmpty((String) o)) {
+        if(StringUtils.isEmpty(String.valueOf(o))) {
           return 0L;
         } else {
-          return getDateFormatter().parse((String) o).getTime();
+          return getDateFormatter().parse(String.valueOf(o)).getTime();
         }
       }
     } catch (Exception e){

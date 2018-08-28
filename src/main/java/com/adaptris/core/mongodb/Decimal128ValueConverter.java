@@ -16,6 +16,6 @@ public class Decimal128ValueConverter extends ValueConverter<Decimal128> {
 
   @Override
   Decimal128 valueOf(Object o) {
-    return Decimal128.parse((String)o);
+    return Decimal128.parse(String.valueOf(o));
   }
 }

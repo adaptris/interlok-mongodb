@@ -15,6 +15,6 @@ public class DoubleValueConverter extends ValueConverter<Double> {
 
   @Override
   Double valueOf(Object o) {
-    return Double.valueOf((String)o);
+    return Double.valueOf(String.valueOf(o));
   }
 }

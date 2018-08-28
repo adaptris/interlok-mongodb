@@ -4,6 +4,8 @@ import com.adaptris.core.util.Args;
 import org.bson.Document;
 import org.hibernate.validator.constraints.NotBlank;
 
+import java.lang.reflect.ParameterizedType;
+
 public abstract class ValueConverter<T> {
 
   @NotBlank
@@ -18,10 +20,23 @@ public abstract class ValueConverter<T> {
     setKey(key);
   }
 
+  @SuppressWarnings("unchecked")
   public T convert(Document original){
-    Object value = original.get(getKey());
+    String[] keys = getKey().split("\\.");
+    Document document = original;
+    Object value = null;
+    for (String key: keys) {
+      value = document.get(key);
+      if(value instanceof Document){
+        document = (Document)value;
+      }
+    }
     if (value == null){
       return null;
+    }
+    Class<T> type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];;
+    if(type.isInstance(value)) {
+      return (T)value;
     }
     return valueOf(value);
   }

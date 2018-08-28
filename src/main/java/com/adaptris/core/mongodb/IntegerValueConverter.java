@@ -15,6 +15,6 @@ public class IntegerValueConverter extends ValueConverter<Integer> {
 
   @Override
   Integer valueOf(Object o) {
-    return Integer.valueOf((String)o);
+    return Integer.valueOf(String.valueOf(o));
   }
 }

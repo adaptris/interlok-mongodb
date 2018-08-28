@@ -27,10 +27,10 @@ public class DateValueConverter extends ValueConverter<Date> {
   @Override
   Date valueOf(Object o) {
     try {
-      if(StringUtils.isEmpty((String) o)) {
+      if(StringUtils.isEmpty(String.valueOf(o))) {
         return null;
       } else {
-        return getDateFormatter().parse((String) o);
+        return getDateFormatter().parse(String.valueOf(o));
       }
     } catch (Exception e){
       throw new IllegalArgumentException(String.format("Failed to convert input string [%s] to type date", o), e);
