@@ -16,6 +16,7 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
@@ -34,6 +35,9 @@ import java.io.Writer;
  */
 public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
 
+  @AdvancedConfig
+  private Integer batchSize;
+
 
   public MongoDBRetrieveProducer() {
     //NOP
@@ -47,18 +51,29 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
       generator.writeStartArray();
       MongoIterable<Document> results = retrieveResults(collection, msg);
+      if(getBatchSize() != null) {
+        results.batchSize(getBatchSize());
+      }
       if(results != null) {
         for (Document document : results) {
           generator.writeRawValue(document.toJson());
         }
       }
       generator.writeEndArray();
-      return reply;
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
+    log.trace(String.format("Response size [%s]", reply.getSize()));
+    return reply;
   }
 
   protected abstract MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException;
 
+  public Integer getBatchSize() {
+    return batchSize;
+  }
+
+  public void setBatchSize(Integer batchSize) {
+    this.batchSize = batchSize;
+  }
 }
