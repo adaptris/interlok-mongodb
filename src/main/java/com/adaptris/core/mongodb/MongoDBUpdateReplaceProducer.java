@@ -4,6 +4,7 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.interlok.InterlokException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -31,10 +32,11 @@ public abstract class MongoDBUpdateReplaceProducer extends MongoDBArrayProducer 
       filters.add(Filters.eq(field, document.get(field)));
     }
     Bson filter = Filters.and(filters);
-    actionDocument(collection, filter, document);
+    UpdateResult result = actionDocument(collection, filter, document);
+    log.trace(result.toString());
   }
 
-  abstract void actionDocument(MongoCollection<Document> collection, Bson filter, Document document);
+  abstract UpdateResult actionDocument(MongoCollection<Document> collection, Bson filter, Document document);
 
   public List<String> getFilterFields() {
     return filterFields;

@@ -3,8 +3,10 @@ package com.adaptris.core.mongodb;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.ProduceDestination;
+import com.mongodb.bulk.UpdateRequest;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
@@ -31,11 +33,11 @@ public class MongoDBReplaceProducer extends MongoDBUpdateReplaceProducer {
   private List<ValueConverter> valueConverters = new ArrayList<>();
 
   @Override
-  void actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
+  UpdateResult actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
     for(ValueConverter valueConverter : getValueConverters()){
       document.put(valueConverter.key(), valueConverter.convert(document));
     }
-    collection.replaceOne(filter, document, new ReplaceOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
+    return collection.replaceOne(filter, document, new ReplaceOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
   }
 
   public List<ValueConverter> getValueConverters() {

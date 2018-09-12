@@ -22,13 +22,19 @@ import com.adaptris.util.TimeInterval;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +64,7 @@ public abstract class MongoDBCase extends ProducerCase {
   }
 
   @Before
+  @SuppressWarnings("unchecked")
   public void setUp() throws Exception{
     if(localTests){
       connection = new MongoDBConnection(connectionUri, "database");
@@ -72,6 +79,11 @@ public abstract class MongoDBCase extends ProducerCase {
       doReturn(database).when(connection).retrieveMongoDatabase();
       collection = mock(MongoCollection.class);
       doReturn(collection).when(database).getCollection(COLLECTION);
+      UpdateResult updateResult = mock(UpdateResult.class);
+      doReturn(updateResult).when(collection).updateOne(any(), any(), any(UpdateOptions.class));
+      doReturn(updateResult).when(collection).replaceOne(any(Bson.class), any(), any(ReplaceOptions.class));
+      DeleteResult deleteResult = mock(DeleteResult.class);
+      doReturn(deleteResult).when(collection).deleteOne(any());
     }
   }
 

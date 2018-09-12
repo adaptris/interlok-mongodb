@@ -61,6 +61,7 @@ public class MongoDBWriteProducer extends MongoDBArrayProducer {
       document.put(valueConverter.key(), valueConverter.convert(document));
     }
     collection.insertOne(document);
+    log.trace("Record Inserted");
   }
 
   public List<ValueConverter> getValueConverters() {

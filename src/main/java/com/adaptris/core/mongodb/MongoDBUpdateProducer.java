@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
@@ -42,8 +43,8 @@ public class MongoDBUpdateProducer extends MongoDBUpdateReplaceProducer {
 
 
   @Override
-  void actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
-    collection.updateOne(filter, document, new UpdateOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
+  UpdateResult actionDocument(MongoCollection<Document> collection, Bson filter, Document document) {
+    return collection.updateOne(filter, document, new UpdateOptions().upsert(upsert()).bypassDocumentValidation(bypassDocumentValidation()));
   }
 
   public MongoDBUpdateProducer withFilterFields(List<String> filterFields) {
