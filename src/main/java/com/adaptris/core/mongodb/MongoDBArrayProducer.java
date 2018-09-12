@@ -40,12 +40,7 @@ public abstract class MongoDBArrayProducer extends MongoDBProducer {
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
     try {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
-      ObjectMapper mapper = new ObjectMapper();
-      BufferedReader buf = new BufferedReader(msg.getReader(), DEFAULT_BUFFER_SIZE);
-      JsonParser parser = mapper.getFactory().createParser(buf);
-      if(parser.nextToken() == JsonToken.START_ARRAY) {
-        parser.close();
-        buf.close();
+      if (isJsonArray(msg)) {
         LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
         for (AdaptrisMessage m : splitter.splitMessage(msg)) {
           parseAndActionDocument(collection, m);
@@ -56,6 +51,14 @@ public abstract class MongoDBArrayProducer extends MongoDBProducer {
       return reply;
     } catch (InterlokException | IOException e) {
       throw ExceptionHelper.wrapProduceException(e);
+    }
+  }
+
+  private boolean isJsonArray(AdaptrisMessage msg) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    try (BufferedReader buf = new BufferedReader(msg.getReader(), DEFAULT_BUFFER_SIZE);
+        JsonParser parser = mapper.getFactory().createParser(buf)) {
+      return parser.nextToken() == JsonToken.START_ARRAY;
     }
   }
 
