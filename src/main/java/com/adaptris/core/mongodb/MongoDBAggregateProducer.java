@@ -24,6 +24,8 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
+import com.adaptris.core.util.CloseableIterable;
+import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.AggregateIterable;
@@ -36,6 +38,7 @@ import org.bson.conversions.Bson;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,8 +116,16 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
   private List<Bson> createPipeline(AdaptrisMessage message) throws InterlokException {
     List<Bson> results = new ArrayList<>();
     LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
-    for (AdaptrisMessage m : splitter.splitMessage(AdaptrisMessageFactory.getDefaultInstance().newMessage(getPipeline().extract(message)))) {
-      results.add(BsonDocument.parse(m.getContent()));
+    try (CloseableIterable<AdaptrisMessage> messages =
+             CloseableIterable.ensureCloseable(
+                 splitter.splitMessage(AdaptrisMessageFactory.getDefaultInstance().newMessage(getPipeline().extract(message)))
+             )
+    ) {
+      for(AdaptrisMessage m : messages) {
+        results.add(BsonDocument.parse(m.getContent()));
+      }
+    } catch (IOException e) {
+      throw ExceptionHelper.wrapServiceException(e);
     }
     return results;
   }

@@ -18,11 +18,13 @@ package com.adaptris.core.mongodb;
 
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
+import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
@@ -42,8 +44,10 @@ public abstract class MongoDBArrayProducer extends MongoDBProducer {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
       if (isJsonArray(msg)) {
         LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
-        for (AdaptrisMessage m : splitter.splitMessage(msg)) {
-          parseAndActionDocument(collection, m);
+        try (CloseableIterable<AdaptrisMessage> messages = CloseableIterable.ensureCloseable(splitter.splitMessage(msg))) {
+          for(AdaptrisMessage m : messages) {
+            parseAndActionDocument(collection, m);
+          }
         }
       } else {
         parseAndActionDocument(collection, msg);
