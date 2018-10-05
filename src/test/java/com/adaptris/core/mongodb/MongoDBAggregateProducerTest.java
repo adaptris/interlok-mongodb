@@ -32,6 +32,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -62,6 +63,7 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
       AggregateIterable iterable = mock(AggregateIterable.class);
 
       doReturn(iterable).when(collection).aggregate(any());
+      doReturn(iterable).when(iterable).allowDiskUse(anyBoolean());
 
       doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(iterable).iterator();
     }

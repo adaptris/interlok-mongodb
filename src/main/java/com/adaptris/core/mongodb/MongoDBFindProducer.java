@@ -84,6 +84,9 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
   private DataInputParameter<String> sort;
 
   @Valid
+  private DataInputParameter<String> projection;
+
+  @Valid
   @InputFieldHint(expression = true)
   private String limit;
 
@@ -94,6 +97,9 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
     FindIterable<Document> iterable =  collection.find(createFilter(msg));
+    if(getProjection() != null){
+      iterable = iterable.projection(BsonDocument.parse(getProjection().extract(msg)));
+    }
     if (getSort() != null){
       iterable  = iterable.sort(BsonDocument.parse(getSort().extract(msg)));
     }
@@ -129,6 +135,14 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   public void setLimit(String limit) {
     this.limit = limit;
+  }
+
+  public DataInputParameter<String> getProjection() {
+    return projection;
+  }
+
+  public void setProjection(DataInputParameter<String> projection) {
+    this.projection = projection;
   }
 
   public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {

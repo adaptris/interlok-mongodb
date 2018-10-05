@@ -18,10 +18,13 @@ package com.adaptris.core.mongodb;
 
 import com.adaptris.core.*;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
+import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.interlok.InterlokException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
@@ -39,25 +42,30 @@ public abstract class MongoDBArrayProducer extends MongoDBProducer {
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
     try {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
-      ObjectMapper mapper = new ObjectMapper();
-      BufferedReader buf = new BufferedReader(msg.getReader(), DEFAULT_BUFFER_SIZE);
-      JsonParser parser = mapper.getFactory().createParser(buf);
-      if(parser.nextToken() == JsonToken.START_ARRAY) {
-        parser.close();
-        buf.close();
+      if (isJsonArray(msg)) {
         LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
-        for (AdaptrisMessage m : splitter.splitMessage(msg)) {
-          parseAndActionDocument(collection, m);
+        try (CloseableIterable<AdaptrisMessage> messages = CloseableIterable.ensureCloseable(splitter.splitMessage(msg))) {
+          for(AdaptrisMessage m : messages) {
+            parseAndActionDocument(collection, m);
+          }
         }
       } else {
         parseAndActionDocument(collection, msg);
       }
       return reply;
-    } catch (CoreException | IOException e) {
+    } catch (InterlokException | IOException e) {
       throw ExceptionHelper.wrapProduceException(e);
     }
   }
 
-  public abstract void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message);
+  private boolean isJsonArray(AdaptrisMessage msg) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    try (BufferedReader buf = new BufferedReader(msg.getReader(), DEFAULT_BUFFER_SIZE);
+        JsonParser parser = mapper.getFactory().createParser(buf)) {
+      return parser.nextToken() == JsonToken.START_ARRAY;
+    }
+  }
+
+  public abstract void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message) throws InterlokException;
 
 }

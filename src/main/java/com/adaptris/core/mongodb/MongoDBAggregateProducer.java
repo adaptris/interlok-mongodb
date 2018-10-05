@@ -17,14 +17,18 @@
 package com.adaptris.core.mongodb;
 
 import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
+import com.adaptris.core.util.CloseableIterable;
+import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -34,6 +38,7 @@ import org.bson.conversions.Bson;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +90,12 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
   @NotNull
   private DataInputParameter<String> pipeline;
 
+  @AdvancedConfig
+  private Boolean allowDiskUse;
+
+  @AdvancedConfig
+  private Boolean toCollection;
+
 
   public MongoDBAggregateProducer() {
     //NOP
@@ -92,15 +103,29 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
-    return collection.aggregate(createPipeline(msg));
+    AggregateIterable<Document> results = collection.aggregate(createPipeline(msg)).allowDiskUse(allowDiskUse());
+    if(toCollection()) {
+      results.toCollection();
+      return null;
+    } else {
+      return results;
+    }
   }
 
 
   private List<Bson> createPipeline(AdaptrisMessage message) throws InterlokException {
     List<Bson> results = new ArrayList<>();
     LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
-    for (AdaptrisMessage m : splitter.splitMessage(AdaptrisMessageFactory.getDefaultInstance().newMessage(getPipeline().extract(message)))) {
-      results.add(BsonDocument.parse(m.getContent()));
+    try (CloseableIterable<AdaptrisMessage> messages =
+             CloseableIterable.ensureCloseable(
+                 splitter.splitMessage(AdaptrisMessageFactory.getDefaultInstance().newMessage(getPipeline().extract(message)))
+             )
+    ) {
+      for(AdaptrisMessage m : messages) {
+        results.add(BsonDocument.parse(m.getContent()));
+      }
+    } catch (IOException e) {
+      throw ExceptionHelper.wrapServiceException(e);
     }
     return results;
   }
@@ -113,6 +138,29 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
     this.pipeline = pipeline;
   }
 
+  public Boolean getAllowDiskUse() {
+    return allowDiskUse;
+  }
+
+  public void setAllowDiskUse(Boolean allowDiskUse) {
+    this.allowDiskUse = allowDiskUse;
+  }
+
+  boolean allowDiskUse(){
+    return getAllowDiskUse() != null ? getAllowDiskUse() : false;
+  }
+
+  public Boolean getToCollection() {
+    return toCollection;
+  }
+
+  public void setToCollection(Boolean toCollection) {
+    this.toCollection = toCollection;
+  }
+
+  boolean toCollection(){
+    return getToCollection() != null ? getToCollection() : false;
+  }
 
   public MongoDBAggregateProducer withPipeline(DataInputParameter<String> filter) {
     setPipeline(filter);

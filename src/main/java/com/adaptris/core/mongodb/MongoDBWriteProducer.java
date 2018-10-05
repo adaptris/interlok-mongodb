@@ -26,10 +26,14 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
 
+import javax.validation.Valid;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Producer that inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
@@ -43,13 +47,29 @@ import java.io.IOException;
 @XStreamAlias("mongodb-write-producer")
 public class MongoDBWriteProducer extends MongoDBArrayProducer {
 
+  @Valid
+  @XStreamImplicit
+  private List<ValueConverter> valueConverters = new ArrayList<>();
+
   public MongoDBWriteProducer(){
     //NOP
   }
 
   public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
+    for(ValueConverter valueConverter : getValueConverters()){
+      document.put(valueConverter.key(), valueConverter.convert(document));
+    }
     collection.insertOne(document);
+    log.trace("Record Inserted");
+  }
+
+  public List<ValueConverter> getValueConverters() {
+    return valueConverters;
+  }
+
+  public void setValueConverters(List<ValueConverter> valueConverters) {
+    this.valueConverters = valueConverters;
   }
 
   public MongoDBWriteProducer withDestination(ProduceDestination destination){

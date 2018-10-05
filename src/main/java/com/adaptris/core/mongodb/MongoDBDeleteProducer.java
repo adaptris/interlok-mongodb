@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.DeleteResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.bson.Document;
 
@@ -49,7 +50,8 @@ public class MongoDBDeleteProducer extends MongoDBArrayProducer {
 
   public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
-    collection.deleteOne(document);
+    DeleteResult result = collection.deleteOne(document);
+    log.trace(result.toString());
   }
 
   public MongoDBDeleteProducer withDestination(ProduceDestination destination){
