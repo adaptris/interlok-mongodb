@@ -12,6 +12,7 @@ import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.bson.Document;
@@ -57,7 +58,8 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
         }
         Document result = new Document();
         result.put("$set", updates);
-        collection.updateOne(eq("_id", id), result);
+        UpdateResult updateResult = collection.updateOne(eq("_id", id), result);
+        log.trace(updateResult.toString());
       }
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
