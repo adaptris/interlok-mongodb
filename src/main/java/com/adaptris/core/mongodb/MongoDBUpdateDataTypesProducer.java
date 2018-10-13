@@ -1,5 +1,16 @@
 package com.adaptris.core.mongodb;
 
+import static com.mongodb.client.model.Filters.eq;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.AdaptrisMessage;
@@ -8,23 +19,11 @@ import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
-import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
-import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
-import javax.validation.Valid;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import static com.mongodb.client.model.Filters.eq;
 
 
 /**
@@ -59,7 +58,11 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
         Document result = new Document();
         result.put("$set", updates);
         UpdateResult updateResult = collection.updateOne(eq("_id", id), result);
-        log.trace(updateResult.toString());
+        if (updateResult != null) {
+          log.trace(updateResult.toString());
+        } else {
+          log.trace("No Update Result returned");
+        }
       }
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
