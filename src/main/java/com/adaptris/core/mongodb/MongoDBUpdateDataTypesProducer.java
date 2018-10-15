@@ -58,11 +58,7 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
         Document result = new Document();
         result.put("$set", updates);
         UpdateResult updateResult = collection.updateOne(eq("_id", id), result);
-        if (updateResult != null) {
-          log.trace(updateResult.toString());
-        } else {
-          log.trace("No Update Result returned");
-        }
+        log.trace(updateResult.toString());
       }
     } catch (Exception e) {
       throw ExceptionHelper.wrapProduceException(e);
