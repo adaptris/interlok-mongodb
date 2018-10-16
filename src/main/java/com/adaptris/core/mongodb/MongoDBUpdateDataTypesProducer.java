@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.adaptris.annotation.AdapterComponent;
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
@@ -44,11 +45,18 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
   @XStreamImplicit
   private List<ValueConverter> valueConverters = new ArrayList<>();
 
+  @AdvancedConfig
+  private Integer batchSize;
+
   @Override
   protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
     try {
-      MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
-      MongoIterable<Document> iterable =  collection.find(createFilter(msg));
+      MongoCollection<Document> findCollection = getMongoDatabase().getCollection(destination.getDestination(msg));
+      MongoCollection<Document> updateCollection = getMongoDatabase().getCollection(destination.getDestination(msg));
+      MongoIterable<Document> iterable =  findCollection.find(createFilter(msg));
+      if(getBatchSize() != null) {
+        iterable.batchSize(getBatchSize());
+      }
       for(Document original : iterable){
         ObjectId id = original.getObjectId("_id");
         LinkedHashMap<String, Object> updates = new LinkedHashMap<>();
@@ -57,7 +65,7 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
         }
         Document result = new Document();
         result.put("$set", updates);
-        UpdateResult updateResult = collection.updateOne(eq("_id", id), result);
+        UpdateResult updateResult = updateCollection.updateOne(eq("_id", id), result);
         log.trace(updateResult.toString());
       }
     } catch (Exception e) {
@@ -84,6 +92,14 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
 
   public void setValueConverters(List<ValueConverter> valueConverters) {
     this.valueConverters = valueConverters;
+  }
+
+  public Integer getBatchSize() {
+    return batchSize;
+  }
+
+  public void setBatchSize(Integer batchSize) {
+    this.batchSize = batchSize;
   }
 
   public MongoDBUpdateDataTypesProducer withFilter(DataInputParameter<String> filter) {
