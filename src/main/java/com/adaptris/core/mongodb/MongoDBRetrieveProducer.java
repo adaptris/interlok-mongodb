@@ -16,6 +16,10 @@
 
 package com.adaptris.core.mongodb;
 
+import java.io.Writer;
+
+import org.bson.Document;
+
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ProduceDestination;
@@ -26,9 +30,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
-import org.bson.Document;
-
-import java.io.Writer;
 
 /**
  * @author mwarman
@@ -54,10 +55,10 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
       MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
       generator.writeStartArray();
       MongoIterable<Document> results = retrieveResults(collection, msg);
-      if(getBatchSize() != null) {
-        results.batchSize(getBatchSize());
-      }
       if(results != null) {
+        if (getBatchSize() != null) {
+          results.batchSize(getBatchSize());
+        }
         for (Document document : results) {
           generator.writeRawValue(document.toJson(getJsonOutputSettings().settings()));
         }
