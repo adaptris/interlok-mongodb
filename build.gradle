@@ -24,7 +24,7 @@ ext {
   componentName='Interlok MongoDB'
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
-  slf4jVersion = '1.7.27'
+  slf4jVersion = '1.7.28'
   log4j2Version = '2.12.1'
 }
 
@@ -74,8 +74,8 @@ dependencies {
   compile ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
   compile ("com.adaptris:interlok-json:$interlokCoreVersion") { changing=true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
-  compile ("org.mongodb:mongodb-driver:3.10.2")
-  compile ("com.fasterxml.jackson.core:jackson-databind:2.9.9.3")
+  compile ("org.mongodb:mongodb-driver:3.11.0")
+  compile ("com.fasterxml.jackson.core:jackson-databind:2.10.0")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testCompile ("junit:junit:4.12")
