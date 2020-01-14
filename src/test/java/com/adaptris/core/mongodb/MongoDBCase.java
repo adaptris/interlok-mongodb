@@ -16,15 +16,19 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+
 import java.util.concurrent.TimeUnit;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.After;
 import org.junit.Before;
+
 import com.adaptris.core.ProducerCase;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.util.TimeInterval;
@@ -35,6 +39,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -46,7 +51,7 @@ public abstract class MongoDBCase extends ProducerCase {
 
   MongoDBConnection connection;
   MongoDatabase database;
-  MongoCollection collection;
+  MongoCollection<Document> collection;
 
   final boolean localTests;
   String connectionUri;
@@ -62,10 +67,9 @@ public abstract class MongoDBCase extends ProducerCase {
     }
   }
 
-  @Override
   @Before
   @SuppressWarnings("unchecked")
-  public void setUp() throws Exception{
+  public void setUp() throws Exception {
     if(localTests){
       connection = new MongoDBConnection(connectionUri, "database");
       LifecycleHelper.initAndStart(connection);
@@ -86,9 +90,13 @@ public abstract class MongoDBCase extends ProducerCase {
       DeleteResult deleteResult = mock(DeleteResult.class);
       doReturn(deleteResult).when(collection).deleteOne(any());
     }
+    onSetup();
+  }
+  
+  protected void onSetup() throws Exception {
+    // For sub-class to override
   }
 
-  @Override
   @After
   public void tearDown(){
     if (localTests){

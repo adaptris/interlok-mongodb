@@ -16,13 +16,12 @@
 
 package com.adaptris.core.mongodb;
 
-import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
-import com.adaptris.core.StandaloneProducer;
-import com.adaptris.core.util.LifecycleHelper;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.ReplaceOptions;
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.Before;
@@ -30,11 +29,13 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.mockito.Mockito.mock;
+import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageFactory;
+import com.adaptris.core.ConfiguredDestination;
+import com.adaptris.core.StandaloneProducer;
+import com.adaptris.core.util.LifecycleHelper;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.ReplaceOptions;
 
 /**
  * @author mwarman
@@ -42,10 +43,9 @@ import static org.mockito.Mockito.mock;
 public class MongoDBReplaceProducerTest extends MongoDBCase {
 
 
-  @SuppressWarnings("unchecked")
+  @Override
   @Before
-  public void setUp() throws Exception{
-    super.setUp();
+  public void onSetup() throws Exception {
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
@@ -60,7 +60,11 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
+
   @Test
   public void testProduceUpsertArrayNoData() throws Exception{
     clearData();
@@ -79,7 +83,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceUpsertNoArrayNoData() throws Exception{
     clearData();
@@ -98,7 +101,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceNoUpsertArrayNoData() throws Exception{
     clearData();
@@ -117,7 +119,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceNoUpsertNoArrayNoData() throws Exception{
     clearData();
@@ -136,7 +137,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceUpsertNoArrayData() throws Exception{
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
@@ -154,7 +154,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceUpsertNoArrayDataValueConverter() throws Exception{
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
@@ -179,10 +178,10 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBReplaceProducer()
-            .withUpsert(true)
-            .withFilterFields(Collections.singletonList("_id"))
-            .withDestination(new ConfiguredDestination("collection"))
-    );
+        .withUpsert(true)
+        .withFilterFields(Collections.singletonList("_id"))
+        .withDestination(new ConfiguredDestination("collection"))
+        );
   }
 
   private void assertRecordsArePresent(int expected){
@@ -191,7 +190,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     assertEquals(expected, results.size());
   }
 
-  @SuppressWarnings("unchecked")
   private void verifyUpdateCounts(int expected, boolean upsert) {
     ArgumentCaptor<ReplaceOptions> argument = ArgumentCaptor.forClass(ReplaceOptions.class);
     Mockito.verify(collection, Mockito.times(expected)).replaceOne(Mockito.any(Bson.class), Mockito.any(), argument.capture());

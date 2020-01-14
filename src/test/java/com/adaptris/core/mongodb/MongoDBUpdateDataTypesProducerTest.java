@@ -16,6 +16,25 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+
+import org.bson.Document;
+import org.bson.types.Decimal128;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -24,18 +43,8 @@ import com.adaptris.core.common.ConstantDataInputParameter;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.bson.types.Decimal128;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import java.util.*;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @author mwarman
@@ -44,12 +53,11 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
 
   private static final String FILTER = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
 
-  FindIterable allIterable;
+  FindIterable<Document> allIterable;
 
-  @SuppressWarnings("unchecked")
+  @Override
   @Before
-  public void setUp() throws Exception{
-    super.setUp();
+  public void onSetup() throws Exception {
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
         .append("string", 1)
@@ -72,7 +80,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
       collection.insertMany(Arrays.asList(document, document2));
     } else {
       allIterable = mock(FindIterable.class);
-      FindIterable filteredIterable = mock(FindIterable.class);
+      FindIterable<Document> filteredIterable = mock(FindIterable.class);
 
       doReturn(allIterable).when(collection).find(new Document());
       doReturn(filteredIterable).when(collection).find(Document.parse(FILTER));
@@ -81,6 +89,11 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
       doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
 
     }
+  }
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Test
@@ -113,8 +126,8 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
             new DoubleValueConverter("double"),
             new Decimal128ValueConverter("decimal128"),
             new Decimal128ValueConverter("hidden.value")
-        )
-    );
+            )
+        );
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
@@ -153,10 +166,10 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBUpdateDataTypesProducer()
-            .withFilter(new ConstantDataInputParameter(FILTER))
-            .withTypeConverters(Arrays.asList(new StringValueConverter("stars")))
-            .withDestination(new ConfiguredDestination("collection"))
-    );
+        .withFilter(new ConstantDataInputParameter(FILTER))
+        .withTypeConverters(Arrays.asList(new StringValueConverter("stars")))
+        .withDestination(new ConfiguredDestination("collection"))
+        );
   }
 
 }

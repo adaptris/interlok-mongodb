@@ -16,25 +16,31 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.bson.Document;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
 
 /**
  * @author mwarman
  */
 public class MongoDBWriteProducerTest extends MongoDBCase {
 
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduce() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer();
@@ -50,7 +56,6 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceNoArray() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer();
@@ -72,8 +77,8 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBWriteProducer()
-            .withDestination(new ConfiguredDestination("collection"))
-    );
+        .withDestination(new ConfiguredDestination("collection"))
+        );
   }
 
   private void assertRecordsArePresent(int expected){
