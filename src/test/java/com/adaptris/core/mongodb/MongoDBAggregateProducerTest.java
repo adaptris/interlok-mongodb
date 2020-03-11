@@ -16,6 +16,18 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import java.util.Arrays;
+
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -25,16 +37,6 @@ import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.AggregateIterable;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author mwarman
@@ -43,11 +45,9 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
 
   private static final String PIPELINE = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
 
-  @SuppressWarnings("unchecked")
+  @Override
   @Before
-  public void setUp() throws Exception{
-    super.setUp();
-
+  public void onSetup() throws Exception{
     if(localTests){
       Document document = new Document("name", "Café Con Leche")
           .append("stars", 3)
@@ -60,13 +60,18 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
 
       Document document = new Document("_id", "1").append("count", "1");
       Document document2 = new Document("_id", "3").append("count", "1");
-      AggregateIterable iterable = mock(AggregateIterable.class);
+      AggregateIterable<Document> iterable = mock(AggregateIterable.class);
 
       doReturn(iterable).when(collection).aggregate(any());
       doReturn(iterable).when(iterable).allowDiskUse(anyBoolean());
 
       doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(iterable).iterator();
     }
+  }
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Test
@@ -99,8 +104,9 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBAggregateProducer()
-            .withPipeline(new ConstantDataInputParameter(PIPELINE))
-            .withDestination(new ConfiguredDestination("collection"))
-    );
+        .withPipeline(new ConstantDataInputParameter(PIPELINE))
+        .withDestination(new ConfiguredDestination("collection"))
+        );
   }
+
 }

@@ -16,6 +16,20 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.bson.BsonDocument;
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -25,15 +39,6 @@ import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.FindIterable;
-import org.bson.BsonDocument;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @author mwarman
@@ -44,12 +49,11 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   private static final String SORT ="{\"stars\" : 1}";
   private static final Integer LIMIT = 1;
 
-  FindIterable allIterable;
+  FindIterable<Document> allIterable;
 
-  @SuppressWarnings("unchecked")
+  @Override
   @Before
-  public void setUp() throws Exception{
-    super.setUp();
+  public void onSetup() throws Exception {
     Document document = new Document("name", "Café Con Leche")
         .append("stars", 3)
         .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
@@ -61,7 +65,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
       collection.insertMany(Arrays.asList(document, document2));
     } else {
       allIterable = mock(FindIterable.class);
-      FindIterable filteredIterable = mock(FindIterable.class);
+      FindIterable<Document> filteredIterable = mock(FindIterable.class);
 
       doReturn(allIterable).when(collection).find(new Document());
       doReturn(filteredIterable).when(collection).find(Document.parse(FILTER));
@@ -73,6 +77,11 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
       doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(allIterable).iterator();
       doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
     }
+  }
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
   @Test
@@ -194,10 +203,10 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBFindProducer()
-            .withFilter(new ConstantDataInputParameter(FILTER))
-            .withSort(new ConstantDataInputParameter("{\"stars\" : 1}"))
-            .withLimit("5")
-            .withDestination(new ConfiguredDestination("collection"))
-    );
+        .withFilter(new ConstantDataInputParameter(FILTER))
+        .withSort(new ConstantDataInputParameter("{\"stars\" : 1}"))
+        .withLimit("5")
+        .withDestination(new ConfiguredDestination("collection"))
+        );
   }
 }

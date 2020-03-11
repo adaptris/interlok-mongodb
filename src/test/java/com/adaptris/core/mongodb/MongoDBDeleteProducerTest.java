@@ -16,29 +16,31 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * @author mwarman
  */
 public class MongoDBDeleteProducerTest extends MongoDBCase {
 
-  @SuppressWarnings("unchecked")
+  @Override
   @Before
-  public void setUp() throws Exception {
-    super.setUp();
+  public void onSetup() throws Exception {
     if (localTests) {
       Document document = new Document("key", 1);
       Document document2 = new Document("key", 2);
@@ -46,7 +48,11 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
+
   @Test
   public void testProduce() throws Exception{
     MongoDBDeleteProducer producer = new MongoDBDeleteProducer();
@@ -62,7 +68,6 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testProduceNoArray() throws Exception{
     MongoDBDeleteProducer producer = new MongoDBDeleteProducer();
@@ -84,8 +89,8 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBDeleteProducer()
-            .withDestination(new ConfiguredDestination("collection"))
-    );
+        .withDestination(new ConfiguredDestination("collection"))
+        );
   }
 
   private void assertRecordsArePresent(int expected){
