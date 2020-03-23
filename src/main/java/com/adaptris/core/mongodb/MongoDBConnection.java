@@ -23,8 +23,15 @@ import com.adaptris.core.AllowsRetriesConnection;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.util.Args;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.event.ServerHeartbeatFailedEvent;
+import com.mongodb.event.ServerHeartbeatStartedEvent;
+import com.mongodb.event.ServerHeartbeatSucceededEvent;
+import com.mongodb.event.ServerMonitorListener;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import java.sql.SQLException;
@@ -65,6 +72,7 @@ public class MongoDBConnection extends AllowsRetriesConnection {
     try {
       mongoClient = attemptConnect();
       mongoDatabase = mongoClient.getDatabase(getDatabase());
+
     } catch (Exception e) {
       throw new CoreException(e);
     }
@@ -125,17 +133,20 @@ public class MongoDBConnection extends AllowsRetriesConnection {
    */
   private MongoClient attemptConnect() throws SQLException {
     int attemptCount = 0;
-    MongoClient mongoClient = null;
-    while (mongoClient == null) {
+
+    MongoDBServerConnection connection = new MongoDBServerConnection(new ServerAddress(connectionUri));
+    MongoClient mongoClient = connection.getClient();
+
+    while (!connection.isConnected()) {
       attemptCount++;
-      mongoClient = new MongoClient(new MongoClientURI(getConnectionUri()));
-      if (mongoClient == null) {
+
         if (logWarning(attemptCount)) {
-          log.warn("Connection attempt [{}] failed for {}", attemptCount, getConnectionUri());
+          log.warn("Connection attempt [{}] failed for {}", attemptCount, connectionUri);
         }
+
         if (connectionAttempts() != -1 && attemptCount >= connectionAttempts()) {
-          log.error("Failed to make any JDBC Connections");
-          throw new SQLException("Could not connect to {}", getConnectionUri());
+          log.error("Failed to make connection to MongoDB instance");
+          throw new SQLException("Could not connect to " + connectionUri);
         } else {
           log.trace(createLoggingStatement(attemptCount));
           try {
@@ -144,9 +155,47 @@ public class MongoDBConnection extends AllowsRetriesConnection {
             throw new SQLException(e2);
           }
         }
-      }
+
     }
     return mongoClient;
   }
 
+  class MongoDBServerConnection implements ServerMonitorListener {
+    private MongoClient client;
+    private boolean connected = false;
+
+    public MongoDBServerConnection(ServerAddress serverAddress) {
+      try {
+        MongoClientOptions clientOptions = new MongoClientOptions.Builder()
+                .addServerMonitorListener(this)
+                .build();
+        client = new MongoClient(serverAddress, clientOptions);
+      } catch (Exception ex) {
+
+      }
+    }
+
+    @Override
+    public void serverHearbeatStarted(ServerHeartbeatStartedEvent serverHeartbeatStartedEvent) {
+      // Ping Started
+    }
+
+    @Override
+    public void serverHeartbeatSucceeded(ServerHeartbeatSucceededEvent serverHeartbeatSucceededEvent) {
+      connected = true;
+    }
+
+    @Override
+    public void serverHeartbeatFailed(ServerHeartbeatFailedEvent serverHeartbeatFailedEvent) {
+      connected = false;
+    }
+
+    public boolean isConnected() {
+      return connected;
+    }
+
+    public MongoClient getClient() {
+      return client;
+    }
+  }
 }
