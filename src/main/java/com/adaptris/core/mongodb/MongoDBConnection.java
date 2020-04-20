@@ -19,13 +19,22 @@ package com.adaptris.core.mongodb;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
-import com.adaptris.core.AdaptrisConnectionImp;
+import com.adaptris.core.AllowsRetriesConnection;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.util.Args;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.event.ServerHeartbeatFailedEvent;
+import com.mongodb.event.ServerHeartbeatStartedEvent;
+import com.mongodb.event.ServerHeartbeatSucceededEvent;
+import com.mongodb.event.ServerMonitorListener;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
+import java.sql.SQLException;
 
 /**
  * @author mwarman
@@ -35,7 +44,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @AdapterComponent
 @ComponentProfile(summary = "Connect to MongoDB,", tag = "connections,mongodb")
 @DisplayOrder(order = {"connectionUri", "database"})
-public class MongoDBConnection extends AdaptrisConnectionImp {
+public class MongoDBConnection extends AllowsRetriesConnection {
 
   private String connectionUri;
   private String database;
@@ -54,18 +63,23 @@ public class MongoDBConnection extends AdaptrisConnectionImp {
   }
 
   @Override
-  protected void prepareConnection() throws CoreException {
+  protected void prepareConnection() {
     //NOP
   }
 
   @Override
   protected void initConnection() throws CoreException {
-    mongoClient = new MongoClient(new MongoClientURI(getConnectionUri()));
-    mongoDatabase = mongoClient.getDatabase(getDatabase());
+    try {
+      mongoClient = attemptConnect();
+      mongoDatabase = mongoClient.getDatabase(getDatabase());
+
+    } catch (Exception e) {
+      throw new CoreException(e);
+    }
   }
 
   @Override
-  protected void startConnection() throws CoreException {
+  protected void startConnection() {
     //NOP
   }
 
@@ -80,10 +94,9 @@ public class MongoDBConnection extends AdaptrisConnectionImp {
       if (mongoClient != null) {
         mongoClient.close();
       }
+    } catch (Exception ignored) {
+      // ignored
     }
-    catch (Exception ignored) {
-    }
-
   }
 
   protected MongoClient retrieveMongoClient() {
@@ -109,5 +122,80 @@ public class MongoDBConnection extends AdaptrisConnectionImp {
 
   public void setDatabase(String database) {
     this.database = Args.notNull(database, "Database");
+  }
+
+  /**
+   * <p>
+   * Initiate a connection to the database.
+   * </p>
+   *
+   * @throws SQLException if connection fails after exhausting the specified number of retry attempts
+   */
+  private MongoClient attemptConnect() throws SQLException {
+    int attemptCount = 0;
+
+    MongoDBServerConnection connection = new MongoDBServerConnection(new ServerAddress(connectionUri));
+    MongoClient mongoClient = connection.getClient();
+
+    while (!connection.isConnected()) {
+      attemptCount++;
+
+        if (logWarning(attemptCount)) {
+          log.warn("Connection attempt [{}] failed for {}", attemptCount, connectionUri);
+        }
+
+        if (connectionAttempts() != -1 && attemptCount >= connectionAttempts()) {
+          log.error("Failed to make connection to MongoDB instance");
+          throw new SQLException("Could not connect to " + connectionUri);
+        } else {
+          log.trace(createLoggingStatement(attemptCount));
+          try {
+            Thread.sleep(connectionRetryInterval());
+          } catch (InterruptedException e2) {
+            throw new SQLException(e2);
+          }
+        }
+
+    }
+    return mongoClient;
+  }
+
+  class MongoDBServerConnection implements ServerMonitorListener {
+    private MongoClient client;
+    private boolean connected = false;
+
+    public MongoDBServerConnection(ServerAddress serverAddress) {
+      try {
+        MongoClientOptions clientOptions = new MongoClientOptions.Builder()
+                .addServerMonitorListener(this)
+                .build();
+        client = new MongoClient(serverAddress, clientOptions);
+      } catch (Exception ex) {
+
+      }
+    }
+
+    @Override
+    public void serverHearbeatStarted(ServerHeartbeatStartedEvent serverHeartbeatStartedEvent) {
+      // Ping Started
+    }
+
+    @Override
+    public void serverHeartbeatSucceeded(ServerHeartbeatSucceededEvent serverHeartbeatSucceededEvent) {
+      connected = true;
+    }
+
+    @Override
+    public void serverHeartbeatFailed(ServerHeartbeatFailedEvent serverHeartbeatFailedEvent) {
+      connected = false;
+    }
+
+    public boolean isConnected() {
+      return connected;
+    }
+
+    public MongoClient getClient() {
+      return client;
+    }
   }
 }
