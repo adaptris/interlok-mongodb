@@ -217,6 +217,7 @@ publishing {
         properties.appendNode("target", "3.7.0+")
         properties.appendNode("license", "false")
         properties.appendNode("tags", "mongodb,db")
+        properties.appendNode("repository", "https://github.com/adaptris/interlok-mongodb")
       }
     }
   }
