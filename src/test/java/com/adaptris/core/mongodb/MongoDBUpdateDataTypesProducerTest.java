@@ -16,25 +16,24 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-
 import org.bson.Document;
 import org.bson.types.Decimal128;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -49,6 +48,7 @@ import com.mongodb.client.MongoCollection;
 /**
  * @author mwarman
  */
+@SuppressWarnings("deprecation")
 public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
 
   private static final String FILTER = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
@@ -111,7 +111,8 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
   @Test
   @SuppressWarnings("unchecked")
   public void testDoRequest() throws Exception{
-    MongoDBUpdateDataTypesProducer producer = new MongoDBUpdateDataTypesProducer();
+    MongoDBUpdateDataTypesProducer producer =
+        new MongoDBUpdateDataTypesProducer().withCollection("collection");
     producer.withFilter(new ConstantDataInputParameter(FILTER));
     producer.withTypeConverters(
         Arrays.asList(
@@ -131,7 +132,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
-    producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     Map<String, Object> result;
     if(!localTests) {
       verify(collection, times(1)).find(Document.parse(FILTER));
@@ -168,7 +169,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
         new MongoDBUpdateDataTypesProducer()
         .withFilter(new ConstantDataInputParameter(FILTER))
         .withTypeConverters(Arrays.asList(new StringValueConverter("stars")))
-        .withDestination(new ConfiguredDestination("collection"))
+            .withCollection("collection")
         );
   }
 

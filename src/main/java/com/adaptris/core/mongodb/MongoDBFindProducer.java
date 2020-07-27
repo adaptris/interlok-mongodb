@@ -16,22 +16,21 @@
 
 package com.adaptris.core.mongodb;
 
+import javax.validation.Valid;
+import org.bson.BsonDocument;
+import org.bson.Document;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.interlok.InterlokException;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.bson.BsonDocument;
-import org.bson.Document;
-
-import javax.validation.Valid;
+import lombok.NoArgsConstructor;
 
 /**
  * Producer that executes find MongoDB queries, results returned as JSON Array.
@@ -74,7 +73,8 @@ import javax.validation.Valid;
 @AdapterComponent
 @ComponentProfile(summary = "Executes find MongoDB queries, results returned as JSON Array.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
-@DisplayOrder(order = {"filter", "sort", "limit"})
+@DisplayOrder(order = {"collection", "filter", "sort", "limit"})
+@NoArgsConstructor
 public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   @Valid
@@ -89,10 +89,6 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
   @Valid
   @InputFieldHint(expression = true)
   private String limit;
-
-  public MongoDBFindProducer() {
-    //NOP
-  }
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
@@ -147,11 +143,6 @@ public class MongoDBFindProducer extends MongoDBRetrieveProducer {
 
   public MongoDBFindProducer withFilter(DataInputParameter<String> filter) {
     setFilter(filter);
-    return this;
-  }
-
-  public MongoDBFindProducer withDestination(ProduceDestination destination){
-    setDestination(destination);
     return this;
   }
 

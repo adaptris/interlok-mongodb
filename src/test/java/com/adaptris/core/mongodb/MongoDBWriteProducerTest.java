@@ -16,14 +16,11 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
-
 import org.bson.Document;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -34,6 +31,7 @@ import com.mongodb.client.MongoCollection;
 /**
  * @author mwarman
  */
+@SuppressWarnings("deprecation")
 public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @Override
@@ -43,7 +41,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @Test
   public void testProduce() throws Exception{
-    MongoDBWriteProducer producer = new MongoDBWriteProducer();
+    MongoDBWriteProducer producer = new MongoDBWriteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
@@ -58,7 +56,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @Test
   public void testProduceNoArray() throws Exception{
-    MongoDBWriteProducer producer = new MongoDBWriteProducer();
+    MongoDBWriteProducer producer = new MongoDBWriteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
@@ -77,7 +75,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBWriteProducer()
-        .withDestination(new ConfiguredDestination("collection"))
+            .withCollection("collection")
         );
   }
 

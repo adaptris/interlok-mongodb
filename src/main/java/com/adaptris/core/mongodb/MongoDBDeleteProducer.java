@@ -16,21 +16,15 @@
 
 package com.adaptris.core.mongodb;
 
+import org.bson.Document;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
-import com.adaptris.core.*;
-import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
-import com.adaptris.core.util.ExceptionHelper;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.core.AdaptrisMessage;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.bson.Document;
-
-import java.io.BufferedReader;
-import java.io.IOException;
+import lombok.NoArgsConstructor;
 
 /**
  * Producer that delete JSON objects from MongoDB, if a JSON array is given the array will be split and delete as individual JSON objects.
@@ -42,21 +36,14 @@ import java.io.IOException;
 @ComponentProfile(summary = "Delete JSON objects from MongoDB.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
 @XStreamAlias("mongodb-delete-producer")
+@DisplayOrder(order = {"collection"})
+@NoArgsConstructor
 public class MongoDBDeleteProducer extends MongoDBArrayProducer {
 
-  public MongoDBDeleteProducer(){
-    //NOP
-  }
-
+  @Override
   public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
     DeleteResult result = collection.deleteOne(document);
     log.trace(result.toString());
   }
-
-  public MongoDBDeleteProducer withDestination(ProduceDestination destination){
-    setDestination(destination);
-    return this;
-  }
-
 }

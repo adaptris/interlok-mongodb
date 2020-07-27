@@ -1,22 +1,16 @@
 package com.adaptris.core.mongodb;
 
+import java.util.List;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
-import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.ProduceDestination;
-import com.adaptris.interlok.InterlokException;
+import com.adaptris.annotation.DisplayOrder;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 /**
  * Producer that updates JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
@@ -39,6 +33,8 @@ import java.util.List;
 @ComponentProfile(summary = "Update JSON objects into MongoDB.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
 @XStreamAlias("mongodb-update-producer")
+@DisplayOrder(order = {"collection"})
+@NoArgsConstructor
 public class MongoDBUpdateProducer extends MongoDBUpdateReplaceProducer {
 
 
@@ -57,8 +53,4 @@ public class MongoDBUpdateProducer extends MongoDBUpdateReplaceProducer {
     return this;
   }
 
-  public MongoDBUpdateProducer withDestination(ProduceDestination destination){
-    setDestination(destination);
-    return this;
-  }
 }

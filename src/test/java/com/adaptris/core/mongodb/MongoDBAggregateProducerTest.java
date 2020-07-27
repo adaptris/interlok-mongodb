@@ -16,18 +16,16 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
 import java.util.Arrays;
-
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -41,6 +39,7 @@ import com.mongodb.client.AggregateIterable;
 /**
  * @author mwarman
  */
+@SuppressWarnings("deprecation")
 public class MongoDBAggregateProducerTest extends MongoDBCase {
 
   private static final String PIPELINE = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
@@ -89,11 +88,12 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
 
   @Test
   public void testDoRequest() throws Exception{
-    MongoDBAggregateProducer producer = new MongoDBAggregateProducer().withPipeline(new StringPayloadDataInputParameter());
+    MongoDBAggregateProducer producer = new MongoDBAggregateProducer()
+        .withPipeline(new StringPayloadDataInputParameter()).withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(PIPELINE);
     LifecycleHelper.initAndStart(producer);
-    producer.doRequest(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);
@@ -105,7 +105,7 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBAggregateProducer()
         .withPipeline(new ConstantDataInputParameter(PIPELINE))
-        .withDestination(new ConfiguredDestination("collection"))
+            .withCollection("collection")
         );
   }
 

@@ -16,7 +16,12 @@
 
 package com.adaptris.core.mongodb;
 
-import com.adaptris.core.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import org.bson.Document;
+import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageFactory;
+import com.adaptris.core.ProduceException;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.ExceptionHelper;
@@ -24,24 +29,22 @@ import com.adaptris.interlok.InterlokException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-
-import java.io.BufferedReader;
-import java.io.IOException;
+import lombok.NoArgsConstructor;
 
 /**
  * @author mwarman
  */
+@NoArgsConstructor
 public abstract class MongoDBArrayProducer extends MongoDBProducer {
 
   private static final Integer DEFAULT_BUFFER_SIZE = 8192;
 
   @Override
-  protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
+  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String collectionName, long timeout,
+      AdaptrisMessage reply) throws ProduceException {
     try {
-      MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
+      MongoCollection<Document> collection = getMongoDatabase().getCollection(collectionName);
       if (isJsonArray(msg)) {
         LargeJsonArraySplitter splitter = new LargeJsonArraySplitter().withMessageFactory(AdaptrisMessageFactory.getDefaultInstance());
         try (CloseableIterable<AdaptrisMessage> messages = CloseableIterable.ensureCloseable(splitter.splitMessage(msg))) {

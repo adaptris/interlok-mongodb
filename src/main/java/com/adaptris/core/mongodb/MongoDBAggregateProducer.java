@@ -16,13 +16,20 @@
 
 package com.adaptris.core.mongodb;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import org.bson.BsonDocument;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
 import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.ExceptionHelper;
@@ -32,15 +39,7 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.bson.BsonDocument;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 /**
  * Producer that executes aggregate MongoDB queries, results returned as JSON Array.
@@ -83,7 +82,8 @@ import java.util.List;
 @AdapterComponent
 @ComponentProfile(summary = "Executes aggregate MongoDB queries, results returned as JSON Array.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
-@DisplayOrder(order = {"pipeline"})
+@DisplayOrder(order = {"collection", "allowDiskUse", "toCollection", "pipeline"})
+@NoArgsConstructor
 public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   @Valid
@@ -96,10 +96,6 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
   @AdvancedConfig
   private Boolean toCollection;
 
-
-  public MongoDBAggregateProducer() {
-    //NOP
-  }
 
   @Override
   protected MongoIterable<Document> retrieveResults(MongoCollection<Document> collection, AdaptrisMessage msg) throws InterlokException {
@@ -164,11 +160,6 @@ public class MongoDBAggregateProducer extends MongoDBRetrieveProducer {
 
   public MongoDBAggregateProducer withPipeline(DataInputParameter<String> filter) {
     setPipeline(filter);
-    return this;
-  }
-
-  public MongoDBAggregateProducer withDestination(ProduceDestination destination){
-    setDestination(destination);
     return this;
   }
 }
