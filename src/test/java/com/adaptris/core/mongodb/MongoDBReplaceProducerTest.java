@@ -16,19 +16,16 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -40,6 +37,7 @@ import com.mongodb.client.model.ReplaceOptions;
 /**
  * @author mwarman
  */
+@SuppressWarnings("deprecation")
 public class MongoDBReplaceProducerTest extends MongoDBCase {
 
 
@@ -68,7 +66,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   @Test
   public void testProduceUpsertArrayNoData() throws Exception{
     clearData();
-    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
     producer.registerConnection(connection);
     producer.setUpsert(true);
@@ -86,7 +84,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   @Test
   public void testProduceUpsertNoArrayNoData() throws Exception{
     clearData();
-    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
     producer.registerConnection(connection);
     producer.setUpsert(true);
@@ -104,7 +102,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   @Test
   public void testProduceNoUpsertArrayNoData() throws Exception{
     clearData();
-    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
     producer.registerConnection(connection);
     producer.setUpsert(false);
@@ -122,7 +120,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   @Test
   public void testProduceNoUpsertNoArrayNoData() throws Exception{
     clearData();
-    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
     producer.registerConnection(connection);
     producer.setUpsert(false);
@@ -139,7 +137,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
 
   @Test
   public void testProduceUpsertNoArrayData() throws Exception{
-    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("name"));
     producer.registerConnection(connection);
     producer.setUpsert(true);
@@ -156,7 +154,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
 
   @Test
   public void testProduceUpsertNoArrayDataValueConverter() throws Exception{
-    MongoDBReplaceProducer producer = new MongoDBReplaceProducer();
+    MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("name"));
     producer.registerConnection(connection);
     producer.setUpsert(true);
@@ -180,7 +178,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
         new MongoDBReplaceProducer()
         .withUpsert(true)
         .withFilterFields(Collections.singletonList("_id"))
-        .withDestination(new ConfiguredDestination("collection"))
+            .withCollection("collection")
         );
   }
 

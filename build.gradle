@@ -5,13 +5,15 @@ plugins {
   id 'jacoco'
   // Manage optional dependencies in maven pom.
   id 'nebula.optional-base' version '5.0.3'
-  id 'com.github.spotbugs' version '4.2.3'
+  id 'com.github.spotbugs' version '4.5.0'
   id 'org.owasp.dependencycheck' version '5.3.2.1'
+  id "io.freefair.lombok" version "5.1.1"
+
 }
 
 ext {
-  interlokCoreVersion = project.hasProperty('interlokCoreVersion') ? project.getProperty('interlokCoreVersion') : '3.10-SNAPSHOT'
-  releaseVersion = project.hasProperty('releaseVersion') ? project.getProperty('releaseVersion') : '3.10-SNAPSHOT'
+  interlokCoreVersion = project.hasProperty('interlokCoreVersion') ? project.getProperty('interlokCoreVersion') : '3.11-SNAPSHOT'
+  releaseVersion = project.hasProperty('releaseVersion') ? project.getProperty('releaseVersion') : '3.11-SNAPSHOT'
   nexusBaseUrl = project.hasProperty('nexusBaseUrl') ? project.getProperty('nexusBaseUrl') : 'https://nexus.adaptris.net/nexus'
   mavenPublishUrl = project.hasProperty('mavenPublishUrl') ? project.getProperty('mavenPublishUrl') : nexusBaseUrl + '/content/repositories/snapshots'
   javadocsBaseUrl = nexusBaseUrl + "/content/sites/javadocs/com/adaptris"
@@ -19,6 +21,7 @@ ext {
   repoPassword = project.hasProperty('repoPassword') ? project.getProperty('repoPassword') : 'unknown'
   defaultNexusRepo = project.hasProperty('defaultNexusRepo') ? project.getProperty('defaultNexusRepo') : 'https://repo1.maven.org/maven2/'
   offlineJavadocPackageDir = new File(project.buildDir, "offline-javadoc-packages")
+  delombokTargetDir = new File("${project.projectDir}/src/main/generated")
 
   interlokJavadocs= project.hasProperty('interlokJavadocs') ? project.getProperty('interlokJavadocs') : javadocsBaseUrl + "/interlok-core/" + interlokCoreVersion
   interlokCommonJavadocs= project.hasProperty('interlokCommonJavadocs') ? project.getProperty('interlokCommonJavadocs') : javadocsBaseUrl + "/interlok-common/" + interlokCoreVersion
@@ -59,6 +62,7 @@ sourceCompatibility = 1.8
 group   = 'com.adaptris'
 version = releaseVersion
 def versionDir = "$buildDir/version"
+generateLombokConfig.enabled = false
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -98,8 +102,8 @@ dependencies {
   compile ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
   compile ("com.adaptris:interlok-json:$interlokCoreVersion") { changing=true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
-  compile ("org.mongodb:mongodb-driver:3.12.5")
-  compile ("com.fasterxml.jackson.core:jackson-databind:2.11.0")
+  compile ("org.mongodb:mongodb-driver:3.12.7")
+  compile ("com.fasterxml.jackson.core:jackson-databind:2.11.2")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testCompile ("junit:junit:4.13")
@@ -110,7 +114,8 @@ dependencies {
     changing= true
     exclude group: "org.apache.logging.log4j"
   }
-  testCompile ("org.mockito:mockito-all:1.10.19")
+  testCompile ("org.mockito:mockito-core:3.5.9")
+  testCompile ("org.mockito:mockito-inline:3.5.9")
 
 
   javadoc("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
@@ -193,8 +198,26 @@ task examplesJar(type: Jar, dependsOn: test) {
 }
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
-    from sourceSets.main.allSource
+    from sourceSets.main.extensions.delombokTask
 }
+
+delombok {
+  target = delombokTargetDir
+}
+
+task lgtmCompile(type: JavaCompile, dependsOn: delombok) {
+  group 'Build'
+  description 'Compile for lgtm'
+
+  source = sourceSets.main.extensions.delombokTask
+  destinationDir = sourceSets.main.java.outputDir
+  classpath = project.sourceSets.main.compileClasspath
+}
+
+task deleteGeneratedFiles(type: Delete) {
+  delete delombokTargetDir
+}
+
 artifacts {
   archives javadocJar
   archives examplesJar
@@ -263,6 +286,6 @@ dependencyCheck  {
 
 // disable spotbugsTests which checks our test code..
 spotbugsTest.enabled = false
-
+clean.dependsOn deleteGeneratedFiles
 check.dependsOn jacocoTestReport
 javadoc.dependsOn offlinePackageList

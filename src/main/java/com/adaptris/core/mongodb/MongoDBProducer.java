@@ -16,28 +16,62 @@
 
 package com.adaptris.core.mongodb;
 
-import com.adaptris.core.*;
+import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;
+import java.util.concurrent.TimeUnit;
+import javax.validation.Valid;
+import com.adaptris.annotation.InputFieldHint;
+import com.adaptris.annotation.Removal;
+import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.CoreException;
+import com.adaptris.core.ProduceDestination;
+import com.adaptris.core.ProduceException;
+import com.adaptris.core.RequestReplyProducerImp;
+import com.adaptris.core.util.DestinationHelper;
+import com.adaptris.core.util.LoggingHelper;
 import com.adaptris.util.TimeInterval;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-
-import java.util.concurrent.TimeUnit;
-
-import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author mwarman
  */
+@NoArgsConstructor
 public abstract class MongoDBProducer extends RequestReplyProducerImp {
 
   private static final TimeInterval TIMEOUT = new TimeInterval(2L, TimeUnit.MINUTES);
 
   private transient MongoClient mongoClient = null;
   private transient MongoDatabase mongoDatabase = null;
+  /**
+   * The destination is the MongoDB Collection
+   *
+   */
+  @Getter
+  @Setter
+  @Deprecated
+  @Valid
+  @Removal(version = "4.0.0", message = "Use 'collection' instead")
+  private ProduceDestination destination;
+
+  /**
+   * The MongoDB collection name.
+   */
+  @InputFieldHint(expression = true)
+  @Getter
+  @Setter
+  // Needs to be @NotBlank when destination is removed.
+  private String collection;
+
+  private transient boolean destWarning;
 
   @Override
   public void prepare() {
-    //NOP
+    DestinationHelper.logWarningIfNotNull(destWarning, () -> destWarning = true, getDestination(),
+        "{} uses destination, use 'collection' instead", LoggingHelper.friendlyName(this));
+    DestinationHelper.mustHaveEither(getCollection(), getDestination());
   }
 
   @Override
@@ -47,43 +81,43 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
     mongoDatabase = connection.retrieveMongoDatabase();
   }
 
+
   @Override
-  public void start() {
-    //NOP
+  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String endpoint, long timeout)
+      throws ProduceException {
+    return doRequest(msg, endpoint, timeout, msg);
   }
 
   @Override
-  public void stop() {
-    //NOP
+  protected void doProduce(AdaptrisMessage msg, String endpoint)
+      throws ProduceException {
+    doRequest(msg, endpoint, defaultTimeout(), defaultIfNull(getMessageFactory()).newMessage());
   }
+
+  protected abstract AdaptrisMessage doRequest(AdaptrisMessage msg, String collection, long timeout,
+      AdaptrisMessage reply) throws ProduceException;
 
   @Override
-  public void close() {
-    //NOP
-  }
-
-  @Override
-  protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout) throws ProduceException {
-    return doRequest(msg, destination, timeout, msg);
-  }
-
-  @Override
-  public void produce(AdaptrisMessage msg, ProduceDestination destination) throws ProduceException {
-    doRequest(msg, destination, defaultTimeout(), defaultIfNull(getMessageFactory()).newMessage());
-  }
-
-  protected abstract AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException;
-
   protected long defaultTimeout() {
     return TIMEOUT.toMilliseconds();
   }
 
   protected MongoClient getMongoClient(){
-    return this.mongoClient;
+    return mongoClient;
   }
 
   protected MongoDatabase getMongoDatabase(){
-    return this.mongoDatabase;
+    return mongoDatabase;
   }
 
+  @Override
+  public String endpoint(AdaptrisMessage msg) throws ProduceException {
+    return DestinationHelper.resolveProduceDestination(getCollection(), getDestination(), msg);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T extends MongoDBProducer> T withCollection(String s) {
+    setCollection(s);
+    return(T) this;
+  }
 }

@@ -16,16 +16,13 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ConfiguredDestination;
@@ -36,6 +33,7 @@ import com.mongodb.client.MongoCollection;
 /**
  * @author mwarman
  */
+@SuppressWarnings("deprecation")
 public class MongoDBDeleteProducerTest extends MongoDBCase {
 
   @Override
@@ -55,7 +53,7 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
 
   @Test
   public void testProduce() throws Exception{
-    MongoDBDeleteProducer producer = new MongoDBDeleteProducer();
+    MongoDBDeleteProducer producer = new MongoDBDeleteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
@@ -70,7 +68,7 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
 
   @Test
   public void testProduceNoArray() throws Exception{
-    MongoDBDeleteProducer producer = new MongoDBDeleteProducer();
+    MongoDBDeleteProducer producer = new MongoDBDeleteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
@@ -89,7 +87,7 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     return new StandaloneProducer(
         new MongoDBConnection("mongodb://localhost:27017", "database"),
         new MongoDBDeleteProducer()
-        .withDestination(new ConfiguredDestination("collection"))
+            .withCollection("collection")
         );
   }
 

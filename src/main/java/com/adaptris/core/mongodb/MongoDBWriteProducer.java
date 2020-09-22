@@ -16,24 +16,18 @@
 
 package com.adaptris.core.mongodb;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.Valid;
+import org.bson.Document;
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
-import com.adaptris.core.*;
-import com.adaptris.core.services.splitter.json.LargeJsonArraySplitter;
-import com.adaptris.core.util.ExceptionHelper;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.adaptris.annotation.DisplayOrder;
+import com.adaptris.core.AdaptrisMessage;
 import com.mongodb.client.MongoCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import org.bson.Document;
-
-import javax.validation.Valid;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 /**
  * Producer that inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
@@ -45,16 +39,16 @@ import java.util.List;
 @ComponentProfile(summary = "Inserts JSON objects into MongoDB.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
 @XStreamAlias("mongodb-write-producer")
+@DisplayOrder(order = {"collection"})
+@NoArgsConstructor
 public class MongoDBWriteProducer extends MongoDBArrayProducer {
 
   @Valid
   @XStreamImplicit
   private List<ValueConverter> valueConverters = new ArrayList<>();
 
-  public MongoDBWriteProducer(){
-    //NOP
-  }
 
+  @Override
   public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
     Document document = Document.parse(message.getContent());
     for(ValueConverter valueConverter : getValueConverters()){
@@ -70,11 +64,6 @@ public class MongoDBWriteProducer extends MongoDBArrayProducer {
 
   public void setValueConverters(List<ValueConverter> valueConverters) {
     this.valueConverters = valueConverters;
-  }
-
-  public MongoDBWriteProducer withDestination(ProduceDestination destination){
-    setDestination(destination);
-    return this;
   }
 
 }

@@ -17,12 +17,9 @@
 package com.adaptris.core.mongodb;
 
 import java.io.Writer;
-
 import org.bson.Document;
-
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
@@ -30,10 +27,12 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoIterable;
+import lombok.NoArgsConstructor;
 
 /**
  * @author mwarman
  */
+@NoArgsConstructor
 public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
 
   @AdvancedConfig
@@ -43,16 +42,13 @@ public abstract class MongoDBRetrieveProducer extends MongoDBProducer {
   private JsonOutputSettings jsonOutputSettings = new DefaultJsonOutputSettings();
 
 
-  public MongoDBRetrieveProducer() {
-    //NOP
-  }
-
   @Override
-  protected final AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
+  protected final AdaptrisMessage doRequest(AdaptrisMessage msg, String collectionName,
+      long timeout, AdaptrisMessage reply) throws ProduceException {
     ObjectMapper mapper = new ObjectMapper();
     try (Writer w = reply.getWriter();
          JsonGenerator generator = mapper.getFactory().createGenerator(w).useDefaultPrettyPrinter()) {
-      MongoCollection<Document> collection = getMongoDatabase().getCollection(destination.getDestination(msg));
+      MongoCollection<Document> collection = getMongoDatabase().getCollection(collectionName);
       generator.writeStartArray();
       MongoIterable<Document> results = retrieveResults(collection, msg);
       if(results != null) {

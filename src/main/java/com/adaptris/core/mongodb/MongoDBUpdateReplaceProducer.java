@@ -1,20 +1,21 @@
 package com.adaptris.core.mongodb;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.interlok.InterlokException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 /**
  * @author mwarman
  */
+@NoArgsConstructor
 public abstract class MongoDBUpdateReplaceProducer extends MongoDBArrayProducer {
 
   @XStreamImplicit(itemFieldName = "filter-field")

@@ -1,21 +1,17 @@
 package com.adaptris.core.mongodb;
 
 import static com.mongodb.client.model.Filters.eq;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-
 import javax.validation.Valid;
-
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.interlok.InterlokException;
@@ -25,6 +21,7 @@ import com.mongodb.client.MongoIterable;
 import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import lombok.NoArgsConstructor;
 
 
 /**
@@ -36,6 +33,8 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
 @ComponentProfile(summary = "Update data types in MongoDB.", tag = "producer,mongodb",
     recommended = {MongoDBConnection.class})
 @XStreamAlias("mongodb-update-data-types-producer")
+@NoArgsConstructor
+@DisplayOrder(order = {"collection"})
 public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
 
   @Valid
@@ -49,10 +48,11 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
   private Integer batchSize;
 
   @Override
-  protected AdaptrisMessage doRequest(AdaptrisMessage msg, ProduceDestination destination, long timeout, AdaptrisMessage reply) throws ProduceException {
+  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String collectionName, long timeout,
+      AdaptrisMessage reply) throws ProduceException {
     try {
-      MongoCollection<Document> findCollection = getMongoDatabase().getCollection(destination.getDestination(msg));
-      MongoCollection<Document> updateCollection = getMongoDatabase().getCollection(destination.getDestination(msg));
+      MongoCollection<Document> findCollection = getMongoDatabase().getCollection(collectionName);
+      MongoCollection<Document> updateCollection = getMongoDatabase().getCollection(collectionName);
       MongoIterable<Document> iterable =  findCollection.find(createFilter(msg));
       if(getBatchSize() != null) {
         iterable.batchSize(getBatchSize());
@@ -109,11 +109,6 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
 
   public MongoDBUpdateDataTypesProducer withTypeConverters(List<ValueConverter> valueConverters) {
     setValueConverters(valueConverters);
-    return this;
-  }
-
-  public MongoDBUpdateDataTypesProducer withDestination(ProduceDestination destination){
-    setDestination(destination);
     return this;
   }
 }
