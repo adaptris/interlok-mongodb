@@ -20,7 +20,7 @@ import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;
 import java.util.concurrent.TimeUnit;
 import javax.validation.Valid;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.annotation.Removal;
+import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ProduceDestination;
@@ -53,7 +53,7 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
   @Setter
   @Deprecated
   @Valid
-  @Removal(version = "4.0.0", message = "Use 'collection' instead")
+  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'collection' instead", groups = Deprecated.class)
   private ProduceDestination destination;
 
   /**
