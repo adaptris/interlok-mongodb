@@ -5,6 +5,7 @@ import org.bson.json.JsonWriterSettings;
 
 /**
  * @author mwarman
+ * @config mongodb-default-json-output-settings
  */
 @XStreamAlias("mongodb-default-json-output-settings")
 public class DefaultJsonOutputSettings implements JsonOutputSettings {

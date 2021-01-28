@@ -7,6 +7,9 @@ import org.hibernate.validator.constraints.NotBlank;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @config mongodb-milliseconds-value-converter
+ */
 @XStreamAlias("mongodb-milliseconds-value-converter")
 public class MillisecondsValueConverter extends ValueConverter<Long> {
 
