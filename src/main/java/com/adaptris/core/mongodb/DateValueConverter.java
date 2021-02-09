@@ -7,6 +7,9 @@ import org.hibernate.validator.constraints.NotBlank;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @config mongodb-date-value-converter
+ */
 @XStreamAlias("mongodb-date-value-converter")
 public class DateValueConverter extends ValueConverter<Date> {
 

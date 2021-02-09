@@ -12,6 +12,7 @@ import java.util.Date;
 
 /**
  * @author mwarman
+ * @config mongodb-flatten-json-output-settings
  */
 @XStreamAlias("mongodb-flatten-json-output-settings")
 public class FlattenJsonOutputSettings implements JsonOutputSettings {
