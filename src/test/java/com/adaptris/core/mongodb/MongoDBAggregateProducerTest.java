@@ -16,25 +16,26 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import java.util.Arrays;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.common.ConstantDataInputParameter;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.AggregateIterable;
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author mwarman
@@ -93,7 +94,7 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(PIPELINE);
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     assertJsonArraySize(result, 2);
     LifecycleHelper.stopAndClose(producer);

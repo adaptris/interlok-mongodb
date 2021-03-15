@@ -16,6 +16,27 @@
 
 package com.adaptris.core.mongodb;
 
+import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageFactory;
+import com.adaptris.core.StandaloneProducer;
+import com.adaptris.core.common.ConstantDataInputParameter;
+import com.adaptris.core.common.StringPayloadDataInputParameter;
+import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.config.DataInputParameter;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+import org.bson.types.Decimal128;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -24,26 +45,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import org.bson.Document;
-import org.bson.types.Decimal128;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
-import com.adaptris.core.StandaloneProducer;
-import com.adaptris.core.common.ConstantDataInputParameter;
-import com.adaptris.core.common.StringPayloadDataInputParameter;
-import com.adaptris.core.util.LifecycleHelper;
-import com.adaptris.interlok.config.DataInputParameter;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 
 /**
  * @author mwarman
@@ -132,7 +133,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     Map<String, Object> result;
     if(!localTests) {
       verify(collection, times(1)).find(Document.parse(FILTER));
