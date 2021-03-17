@@ -16,6 +16,16 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import java.util.Arrays;
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -24,18 +34,6 @@ import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.AggregateIterable;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author mwarman
@@ -67,11 +65,6 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
 
       doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(iterable).iterator();
     }
-  }
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
   }
 
   @Test

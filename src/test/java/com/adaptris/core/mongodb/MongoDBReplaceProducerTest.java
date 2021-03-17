@@ -16,24 +16,22 @@
 
 package com.adaptris.core.mongodb;
 
-import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.StandaloneProducer;
-import com.adaptris.core.util.LifecycleHelper;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.ReplaceOptions;
+import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
+import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.core.AdaptrisMessageFactory;
+import com.adaptris.core.StandaloneProducer;
+import com.adaptris.core.util.LifecycleHelper;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.ReplaceOptions;
 
 /**
  * @author mwarman
@@ -57,11 +55,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     } else {
 
     }
-  }
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
   }
 
   @Test

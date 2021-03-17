@@ -16,20 +16,18 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.Arrays;
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author mwarman
@@ -45,11 +43,6 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
       Document document2 = new Document("key", 2);
       collection.insertMany(Arrays.asList(document, document2));
     }
-  }
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
   }
 
   @Test

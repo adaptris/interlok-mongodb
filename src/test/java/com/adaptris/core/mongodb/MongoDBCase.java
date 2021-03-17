@@ -16,21 +16,19 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-
 import java.util.concurrent.TimeUnit;
-
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.After;
 import org.junit.Before;
-
-import com.adaptris.core.ProducerCase;
 import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 import com.adaptris.util.TimeInterval;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -39,7 +37,6 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-
 import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -47,7 +44,7 @@ import net.minidev.json.parser.ParseException;
 /**
  * @author mwarman
  */
-public abstract class MongoDBCase extends ProducerCase {
+public abstract class MongoDBCase extends ExampleProducerCase {
 
   MongoDBConnection connection;
   MongoDatabase database;
@@ -92,7 +89,7 @@ public abstract class MongoDBCase extends ProducerCase {
     }
     onSetup();
   }
-  
+
   protected void onSetup() throws Exception {
     // For sub-class to override
   }

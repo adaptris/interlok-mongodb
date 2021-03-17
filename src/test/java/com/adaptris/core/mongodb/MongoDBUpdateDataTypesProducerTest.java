@@ -16,6 +16,24 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import org.bson.Document;
+import org.bson.types.Decimal128;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -25,26 +43,6 @@ import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.bson.types.Decimal128;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author mwarman
@@ -90,11 +88,6 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
       doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
 
     }
-  }
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
   }
 
   @Test

@@ -16,29 +16,22 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import org.bson.Document;
+import org.junit.Test;
+import org.mockito.Mockito;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author mwarman
  */
 @SuppressWarnings("deprecation")
 public class MongoDBWriteProducerTest extends MongoDBCase {
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
 
   @Test
   public void testProduce() throws Exception{

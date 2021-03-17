@@ -16,6 +16,18 @@
 
 package com.adaptris.core.mongodb;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import java.util.Arrays;
+import java.util.Collections;
+import org.bson.BsonDocument;
+import org.bson.Document;
+import org.junit.Before;
+import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -24,20 +36,6 @@ import com.adaptris.core.common.StringPayloadDataInputParameter;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.config.DataInputParameter;
 import com.mongodb.client.FindIterable;
-import org.bson.BsonDocument;
-import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author mwarman
@@ -77,11 +75,6 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
       doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(allIterable).iterator();
       doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
     }
-  }
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
   }
 
   @Test
