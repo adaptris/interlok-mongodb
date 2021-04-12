@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
@@ -46,18 +45,13 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     }
   }
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
-
   @Test
   public void testProduce() throws Exception{
     MongoDBDeleteProducer producer = new MongoDBDeleteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(0);
     } else {
@@ -72,7 +66,7 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(1);
     } else {

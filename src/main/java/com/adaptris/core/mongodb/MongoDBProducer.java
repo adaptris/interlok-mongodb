@@ -16,24 +16,23 @@
 
 package com.adaptris.core.mongodb;
 
-import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;
-import java.util.concurrent.TimeUnit;
-import javax.validation.Valid;
 import com.adaptris.annotation.InputFieldHint;
-import com.adaptris.validation.constraints.ConfigDeprecated;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
-import com.adaptris.core.ProduceDestination;
 import com.adaptris.core.ProduceException;
 import com.adaptris.core.RequestReplyProducerImp;
-import com.adaptris.core.util.DestinationHelper;
-import com.adaptris.core.util.LoggingHelper;
+import com.adaptris.core.util.Args;
 import com.adaptris.util.TimeInterval;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.validation.constraints.NotBlank;
+import java.util.concurrent.TimeUnit;
+
+import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;
 
 /**
  * @author mwarman
@@ -45,16 +44,6 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
 
   private transient MongoClient mongoClient = null;
   private transient MongoDatabase mongoDatabase = null;
-  /**
-   * The destination is the MongoDB Collection
-   *
-   */
-  @Getter
-  @Setter
-  @Deprecated
-  @Valid
-  @ConfigDeprecated(removalVersion = "4.0.0", message = "Use 'collection' instead", groups = Deprecated.class)
-  private ProduceDestination destination;
 
   /**
    * The MongoDB collection name.
@@ -62,16 +51,12 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
   @InputFieldHint(expression = true)
   @Getter
   @Setter
-  // Needs to be @NotBlank when destination is removed.
+  @NotBlank
   private String collection;
-
-  private transient boolean destWarning;
 
   @Override
   public void prepare() {
-    DestinationHelper.logWarningIfNotNull(destWarning, () -> destWarning = true, getDestination(),
-        "{} uses destination, use 'collection' instead", LoggingHelper.friendlyName(this));
-    DestinationHelper.mustHaveEither(getCollection(), getDestination());
+    Args.notBlank(getCollection(), "collection");
   }
 
   @Override
@@ -112,7 +97,7 @@ public abstract class MongoDBProducer extends RequestReplyProducerImp {
 
   @Override
   public String endpoint(AdaptrisMessage msg) throws ProduceException {
-    return DestinationHelper.resolveProduceDestination(getCollection(), getDestination(), msg);
+    return msg.resolve(getCollection());
   }
 
   @SuppressWarnings("unchecked")

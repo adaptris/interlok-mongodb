@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
@@ -34,18 +33,13 @@ import com.mongodb.client.MongoCollection;
 @SuppressWarnings("deprecation")
 public class MongoDBWriteProducerTest extends MongoDBCase {
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
-
   @Test
   public void testProduce() throws Exception{
     MongoDBWriteProducer producer = new MongoDBWriteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(2);
     } else {
@@ -60,7 +54,7 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(1);
     } else {

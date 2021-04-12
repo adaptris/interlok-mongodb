@@ -19,7 +19,7 @@ package com.adaptris.core.mongodb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.common.ConstantDataInputParameter;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
@@ -91,11 +90,6 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     }
   }
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
-
   @Test
   public void testFilter() {
     MongoDBUpdateDataTypesProducer producer = new MongoDBUpdateDataTypesProducer();
@@ -132,7 +126,7 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     Map<String, Object> result;
     if(!localTests) {
       verify(collection, times(1)).find(Document.parse(FILTER));

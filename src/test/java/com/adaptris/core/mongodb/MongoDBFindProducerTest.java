@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.common.ConstantDataInputParameter;
 import com.adaptris.core.common.StringPayloadDataInputParameter;
@@ -78,11 +77,6 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     }
   }
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
-
   @Test
   public void testFilter() {
     MongoDBFindProducer producer = new MongoDBFindProducer();
@@ -124,7 +118,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     if(!localTests) {
       verify(collection, times(1)).find(new Document());
@@ -140,7 +134,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(FILTER);
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     if(!localTests) {
       verify(collection, times(1)).find(Document.parse(FILTER));
@@ -156,7 +150,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     if(!localTests) {
       verify(collection, times(1)).find(new Document());
@@ -173,7 +167,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     if(!localTests) {
       verify(collection, times(1)).find(new Document());
@@ -191,7 +185,7 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     msg.addMetadata("limit", LIMIT.toString());
     LifecycleHelper.initAndStart(producer);
-    producer.request(msg, new ConfiguredDestination("collection"), TIMEOUT.toMilliseconds());
+    producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
     if(!localTests) {
       verify(collection, times(1)).find(new Document());

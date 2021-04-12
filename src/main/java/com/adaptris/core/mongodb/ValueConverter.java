@@ -1,10 +1,9 @@
 package com.adaptris.core.mongodb;
 
-import com.adaptris.core.util.Args;
-import org.bson.Document;
-import org.hibernate.validator.constraints.NotBlank;
-
 import java.lang.reflect.ParameterizedType;
+import javax.validation.constraints.NotBlank;
+import org.bson.Document;
+import com.adaptris.core.util.Args;
 
 public abstract class ValueConverter<T> {
 

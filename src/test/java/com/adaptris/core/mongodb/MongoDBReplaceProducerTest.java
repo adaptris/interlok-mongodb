@@ -28,7 +28,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ConfiguredDestination;
 import com.adaptris.core.StandaloneProducer;
 import com.adaptris.core.util.LifecycleHelper;
 import com.mongodb.client.MongoCollection;
@@ -58,11 +57,6 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     }
   }
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
-
   @Test
   public void testProduceUpsertArrayNoData() throws Exception{
     clearData();
@@ -72,7 +66,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     producer.setUpsert(true);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(2);
     } else {
@@ -90,7 +84,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     producer.setUpsert(true);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(1);
     } else {
@@ -108,7 +102,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     producer.setUpsert(false);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(0);
     } else {
@@ -126,7 +120,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     producer.setUpsert(false);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(0);
     } else {
@@ -143,7 +137,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     producer.setUpsert(true);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"name\": \"Fred's\", \"stars\": 2}");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(2);
     } else {
@@ -161,7 +155,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     producer.setValueConverters(Collections.singletonList(new IntegerValueConverter("stars")));
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"name\": \"Fred's\", \"stars\": \"2\"}");
     LifecycleHelper.initAndStart(producer);
-    producer.produce(msg, new ConfiguredDestination(COLLECTION));
+    producer.produce(msg);
     if(localTests){
       assertRecordsArePresent(2);
     } else {

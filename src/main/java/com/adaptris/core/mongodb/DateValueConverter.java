@@ -1,12 +1,14 @@
 package com.adaptris.core.mongodb;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.constraints.NotBlank;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.validation.constraints.NotBlank;
+import org.apache.commons.lang3.StringUtils;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
+/**
+ * @config mongodb-date-value-converter
+ */
 @XStreamAlias("mongodb-date-value-converter")
 public class DateValueConverter extends ValueConverter<Date> {
 

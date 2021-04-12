@@ -2,6 +2,9 @@ package com.adaptris.core.mongodb;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
+/**
+ * @config mongodb-integer-value-converter
+ */
 @XStreamAlias("mongodb-integer-value-converter")
 public class IntegerValueConverter extends ValueConverter<Integer> {
 
