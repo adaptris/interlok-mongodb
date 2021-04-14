@@ -110,7 +110,7 @@ dependencies {
   compile ("com.adaptris:interlok-json:$interlokCoreVersion") { changing=true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
   compile ("org.mongodb:mongodb-driver:3.12.8")
-  compile ("com.fasterxml.jackson.core:jackson-databind:2.12.2")
+  compile ("com.fasterxml.jackson.core:jackson-databind:2.12.3")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testCompile ("junit:junit:4.13.2")
