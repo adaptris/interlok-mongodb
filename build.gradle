@@ -122,7 +122,7 @@ dependencies {
   api ("com.adaptris:interlok-common:$interlokCoreVersion") { changing= true}
   api ("com.adaptris:interlok-json:$interlokCoreVersion") { changing=true}
   implementation ("org.slf4j:slf4j-api:$slf4jVersion")
-  implementation ("org.mongodb:mongodb-driver:3.12.9")
+  implementation ("org.mongodb:mongodb-driver:3.12.10")
   implementation ("com.fasterxml.jackson.core:jackson-databind:2.12.4")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
