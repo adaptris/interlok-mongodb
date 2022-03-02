@@ -4,15 +4,15 @@ plugins {
   id 'jacoco'
   // Manage optional dependencies in maven pom.
   id 'nebula.optional-base' version '7.0.0'
-  id 'com.github.spotbugs' version '4.7.9'
-  id 'org.owasp.dependencycheck' version '6.5.0.1'
-  id "io.freefair.lombok" version "6.2.0"
+  id 'com.github.spotbugs' version '5.0.5'
+  id 'org.owasp.dependencycheck' version '6.5.3'
+  id "io.freefair.lombok" version "6.3.0"
 
 }
 
 ext {
-  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '4.3-SNAPSHOT'
-  releaseVersion = project.findProperty('releaseVersion') ?: '4.3-SNAPSHOT'
+  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '4.4-SNAPSHOT'
+  releaseVersion = project.findProperty('releaseVersion') ?: '4.4-SNAPSHOT'
   nexusBaseUrl = project.findProperty('nexusBaseUrl') ?: 'https://nexus.adaptris.net/nexus'
   mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: nexusBaseUrl + '/content/repositories/snapshots'
   javadocsBaseUrl = nexusBaseUrl + "/content/sites/javadocs/com/adaptris"
@@ -30,9 +30,9 @@ ext {
 
   organizationName = "Adaptris Ltd"
   organizationUrl = "http://interlok.adaptris.net"
-  slf4jVersion = '1.7.32'
+  slf4jVersion = '1.7.35'
   log4j2Version = '2.13.2'
-  mockitoVersion = '4.0.0'
+  mockitoVersion = '4.3.1'
 }
 
 ext.gitBranchNameOrTimestamp = { branchName ->
@@ -123,7 +123,7 @@ dependencies {
   api ("com.adaptris:interlok-json:$interlokCoreVersion") { changing=true}
   implementation ("org.slf4j:slf4j-api:$slf4jVersion")
   implementation ("org.mongodb:mongodb-driver:3.12.10")
-  implementation ("com.fasterxml.jackson.core:jackson-databind:2.13.0")
+  implementation ("com.fasterxml.jackson.core:jackson-databind:2.13.1")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testImplementation ('junit:junit:4.13.2')
@@ -254,6 +254,7 @@ publishing {
       pom.withXml {
         asNode().appendNode("name", componentName)
         asNode().appendNode("description", componentDesc)
+		asNode().appendNode("url", "https://interlok.adaptris.net/interlok-docs/#/")
         def properties = asNode().appendNode("properties")
         properties.appendNode("target", "3.7.0+")
         properties.appendNode("license", "false")
@@ -276,21 +277,17 @@ publishing {
 spotbugsMain {
   effort = "max"
   reportLevel = "high"
-  // showProgress = "true"
-  effort = "max"
-  // Ignore failures?
-  // ignoreFailures = false
   reports {
     xml {
-      enabled = false
+      required.set(false)
     }
     html {
-      enabled = true
+      required.set(true)
+      stylesheet = 'default.xsl'
     }
   }
-  // includeFilter = new File("$rootDir/gradle/spotbugs-filter.xml")
-  // excludeFilter = new File("$rootDir/gradle/spotbugs-exclude.xml")
 }
+
 dependencyCheck  {
   suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml" ]
   scanConfigurations = [ "api", "compileClasspath", "runtimeClasspath" ]
