@@ -33,6 +33,7 @@ ext {
   slf4jVersion = '1.7.36'
   log4j2Version = '2.13.2'
   mockitoVersion = '4.4.0'
+  jacksonVersion = '2.13.2.20220324'
 }
 
 ext.gitBranchNameOrTimestamp = { branchName ->
@@ -123,7 +124,9 @@ dependencies {
   api ("com.adaptris:interlok-json:$interlokCoreVersion") { changing=true}
   implementation ("org.slf4j:slf4j-api:$slf4jVersion")
   implementation ("org.mongodb:mongodb-driver:3.12.10")
-  implementation ("com.fasterxml.jackson.core:jackson-databind:2.13.2.1")
+  // Dependency to platform/BOM
+  implementation (platform("com.fasterxml.jackson:jackson-bom:$jacksonVersion"))
+  implementation ("com.fasterxml.jackson.core:jackson-databind")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
   testImplementation ('junit:junit:4.13.2')
