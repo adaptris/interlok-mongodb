@@ -33,7 +33,7 @@ ext {
   slf4jVersion = '1.7.36'
   log4j2Version = '2.13.2'
   mockitoVersion = '4.7.0'
-  jacksonVersion = '2.13.3'
+  jacksonVersion = '2.13.4'
 }
 
 ext.gitBranchNameOrTimestamp = { branchName ->
