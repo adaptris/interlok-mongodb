@@ -17,16 +17,20 @@
 package com.adaptris.core.mongodb;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+
 import java.util.concurrent.TimeUnit;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
+
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
 import com.adaptris.util.TimeInterval;
@@ -37,9 +41,6 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import net.minidev.json.JSONArray;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 
 /**
  * @author mwarman
@@ -57,9 +58,9 @@ public abstract class MongoDBCase extends ExampleProducerCase {
 
   static final TimeInterval TIMEOUT = new TimeInterval(2L, TimeUnit.MINUTES);
 
-  public MongoDBCase(){
+  public MongoDBCase() {
     localTests = PROPERTIES.getProperty("local.tests") != null && PROPERTIES.getProperty("local.tests").equals("true");
-    if(PROPERTIES.getProperty("local.test.connection.uri") != null) {
+    if (PROPERTIES.getProperty("local.test.connection.uri") != null) {
       connectionUri = PROPERTIES.getProperty("local.test.connection.uri");
     }
   }
@@ -67,7 +68,7 @@ public abstract class MongoDBCase extends ExampleProducerCase {
   @Before
   @SuppressWarnings("unchecked")
   public void setUp() throws Exception {
-    if(localTests){
+    if (localTests) {
       connection = new MongoDBConnection(connectionUri, "database");
       LifecycleHelper.initAndStart(connection);
       database = connection.retrieveMongoDatabase();
@@ -95,26 +96,20 @@ public abstract class MongoDBCase extends ExampleProducerCase {
   }
 
   @After
-  public void tearDown(){
-    if (localTests){
+  public void tearDown() {
+    if (localTests) {
       clearData();
       LifecycleHelper.stopAndClose(connection);
     }
   }
 
-  void assertJsonArraySize(String contents, int size) throws ParseException {
-    final JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-    final Object object = jsonParser.parse(contents);
-    if (object instanceof JSONArray) {
-      final JSONArray array = (JSONArray)object;
-      assertEquals(size, array.size());
-    } else {
-      fail("JSON Array expected");
-    }
+  void assertJsonArraySize(String contents, int size) throws JSONException {
+    final JSONArray array = new JSONArray(contents);
+    assertEquals(size, array.length());
   }
 
-  void clearData(){
-    if (localTests){
+  void clearData() {
+    if (localTests) {
       collection.deleteMany(Document.parse("{}"));
     }
   }
