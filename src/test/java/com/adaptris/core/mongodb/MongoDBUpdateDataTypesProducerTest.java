@@ -16,24 +16,27 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+
 import org.bson.Document;
 import org.bson.types.Decimal128;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -55,27 +58,16 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
   FindIterable<Document> allIterable;
 
   @Override
-  @Before
+  @BeforeEach
   public void onSetup() throws Exception {
-    Document document = new Document("name", "Café Con Leche")
-        .append("stars", 3)
-        .append("string", 1)
-        .append("date", "2018-01-01")
-        .append("milliseconds", "2018-01-01")
-        .append("dateAsDate", new Date())
-        .append("dateNull", null)
-        .append("integer", "1")
-        .append("alreadyInteger", 1)
-        .append("double", "1.1")
-        .append("decimal128", "1.1")
-        .append("long", "1")
-        .append("hidden", new Document().append("value", "1"))
-        .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
-    Document document2 = new Document("name", "Fred's")
-        .append("stars", 1)
-        .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+    Document document = new Document("name", "Café Con Leche").append("stars", 3).append("string", 1).append("date", "2018-01-01")
+        .append("milliseconds", "2018-01-01").append("dateAsDate", new Date()).append("dateNull", null).append("integer", "1")
+        .append("alreadyInteger", 1).append("double", "1.1").append("decimal128", "1.1").append("long", "1")
+        .append("hidden", new Document().append("value", "1")).append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+    Document document2 = new Document("name", "Fred's").append("stars", 1).append("categories",
+        Arrays.asList("Bakery", "Coffee", "Pastries"));
 
-    if(localTests){
+    if (localTests) {
       collection.insertMany(Arrays.asList(document, document2));
     } else {
       allIterable = mock(FindIterable.class);
@@ -104,31 +96,20 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testDoRequest() throws Exception{
-    MongoDBUpdateDataTypesProducer producer =
-        new MongoDBUpdateDataTypesProducer().withCollection("collection");
+  public void testDoRequest() throws Exception {
+    MongoDBUpdateDataTypesProducer producer = new MongoDBUpdateDataTypesProducer().withCollection("collection");
     producer.withFilter(new ConstantDataInputParameter(FILTER));
-    producer.withTypeConverters(
-        Arrays.asList(
-            new StringValueConverter("string"),
-            new DateValueConverter("date", "yyyy-MM-dd"),
-            new DateValueConverter("dateNull", "yyyy-MM-dd"),
-            new MillisecondsValueConverter("dateAsDate", "yyyy-MM-dd"),
-            new MillisecondsValueConverter("milliseconds", "yyyy-MM-dd"),
-            new IntegerValueConverter("integer"),
-            new IntegerValueConverter("alreadyInteger"),
-            new LongValueConverter("long"),
-            new DoubleValueConverter("double"),
-            new Decimal128ValueConverter("decimal128"),
-            new Decimal128ValueConverter("hidden.value")
-            )
-        );
+    producer.withTypeConverters(Arrays.asList(new StringValueConverter("string"), new DateValueConverter("date", "yyyy-MM-dd"),
+        new DateValueConverter("dateNull", "yyyy-MM-dd"), new MillisecondsValueConverter("dateAsDate", "yyyy-MM-dd"),
+        new MillisecondsValueConverter("milliseconds", "yyyy-MM-dd"), new IntegerValueConverter("integer"),
+        new IntegerValueConverter("alreadyInteger"), new LongValueConverter("long"), new DoubleValueConverter("double"),
+        new Decimal128ValueConverter("decimal128"), new Decimal128ValueConverter("hidden.value")));
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
     producer.request(msg, TIMEOUT.toMilliseconds());
     Map<String, Object> result;
-    if(!localTests) {
+    if (!localTests) {
       verify(collection, times(1)).find(Document.parse(FILTER));
       ArgumentCaptor<Document> documents = ArgumentCaptor.forClass(Document.class);
       verify(collection, times(1)).updateOne(any(), documents.capture());
@@ -158,13 +139,9 @@ public class MongoDBUpdateDataTypesProducerTest extends MongoDBCase {
 
   @Override
   protected Object retrieveObjectForSampleConfig() {
-    return new StandaloneProducer(
-        new MongoDBConnection("mongodb://localhost:27017", "database"),
-        new MongoDBUpdateDataTypesProducer()
-        .withFilter(new ConstantDataInputParameter(FILTER))
-        .withTypeConverters(Arrays.asList(new StringValueConverter("stars")))
-            .withCollection("collection")
-        );
+    return new StandaloneProducer(new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBUpdateDataTypesProducer().withFilter(new ConstantDataInputParameter(FILTER))
+            .withTypeConverters(Arrays.asList(new StringValueConverter("stars"))).withCollection("collection"));
   }
 
 }

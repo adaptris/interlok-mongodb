@@ -16,18 +16,21 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.bson.BsonDocument;
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -40,26 +43,23 @@ import com.mongodb.client.FindIterable;
 /**
  * @author mwarman
  */
-@SuppressWarnings("deprecation")
-public class  MongoDBFindProducerTest extends MongoDBCase {
+public class MongoDBFindProducerTest extends MongoDBCase {
 
   private static final String FILTER = "{ \"stars\" : { \"$gte\" : 2, \"$lt\" : 5 }, \"categories\" : \"Bakery\" }";
-  private static final String SORT ="{\"stars\" : 1}";
+  private static final String SORT = "{\"stars\" : 1}";
   private static final Integer LIMIT = 1;
 
   FindIterable<Document> allIterable;
 
   @Override
-  @Before
+  @BeforeEach
   public void onSetup() throws Exception {
-    Document document = new Document("name", "Café Con Leche")
-        .append("stars", 3)
-        .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
-    Document document2 = new Document("name", "Fred's")
-        .append("stars", 1)
-        .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+    Document document = new Document("name", "Café Con Leche").append("stars", 3).append("categories",
+        Arrays.asList("Bakery", "Coffee", "Pastries"));
+    Document document2 = new Document("name", "Fred's").append("stars", 1).append("categories",
+        Arrays.asList("Bakery", "Coffee", "Pastries"));
 
-    if(localTests){
+    if (localTests) {
       collection.insertMany(Arrays.asList(document, document2));
     } else {
       allIterable = mock(FindIterable.class);
@@ -70,7 +70,6 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
 
       doReturn(allIterable).when(allIterable).sort(BsonDocument.parse(SORT));
       doReturn(filteredIterable).when(allIterable).limit(LIMIT);
-
 
       doReturn(new StubMongoCursor(Arrays.asList(document, document2))).when(allIterable).iterator();
       doReturn(new StubMongoCursor(Collections.singletonList(document))).when(filteredIterable).iterator();
@@ -113,14 +112,14 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testDoRequest() throws Exception{
+  public void testDoRequest() throws Exception {
     MongoDBFindProducer producer = new MongoDBFindProducer().withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("Hello World");
     LifecycleHelper.initAndStart(producer);
     producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    if(!localTests) {
+    if (!localTests) {
       verify(collection, times(1)).find(new Document());
     }
     assertJsonArraySize(result, 2);
@@ -128,15 +127,14 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testDoRequestWithFilter() throws Exception{
-    MongoDBFindProducer producer = new MongoDBFindProducer()
-        .withFilter(new StringPayloadDataInputParameter()).withCollection("collection");
+  public void testDoRequestWithFilter() throws Exception {
+    MongoDBFindProducer producer = new MongoDBFindProducer().withFilter(new StringPayloadDataInputParameter()).withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(FILTER);
     LifecycleHelper.initAndStart(producer);
     producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    if(!localTests) {
+    if (!localTests) {
       verify(collection, times(1)).find(Document.parse(FILTER));
     }
     assertJsonArraySize(result, 1);
@@ -144,15 +142,14 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testDoRequestWithSort() throws Exception{
-    MongoDBFindProducer producer = new MongoDBFindProducer()
-        .withSort(new ConstantDataInputParameter(SORT)).withCollection("collection");
+  public void testDoRequestWithSort() throws Exception {
+    MongoDBFindProducer producer = new MongoDBFindProducer().withSort(new ConstantDataInputParameter(SORT)).withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     LifecycleHelper.initAndStart(producer);
     producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    if(!localTests) {
+    if (!localTests) {
       verify(collection, times(1)).find(new Document());
       verify(allIterable, times(1)).sort(BsonDocument.parse(SORT));
     }
@@ -161,15 +158,14 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testDoRequestWithLimit() throws Exception{
-    MongoDBFindProducer producer =
-        new MongoDBFindProducer().withLimit(LIMIT.toString()).withCollection("collection");
+  public void testDoRequestWithLimit() throws Exception {
+    MongoDBFindProducer producer = new MongoDBFindProducer().withLimit(LIMIT.toString()).withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     LifecycleHelper.initAndStart(producer);
     producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    if(!localTests) {
+    if (!localTests) {
       verify(collection, times(1)).find(new Document());
       verify(allIterable, times(1)).limit(LIMIT);
     }
@@ -178,16 +174,15 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testDoRequestWithLimitExpresion() throws Exception{
-    MongoDBFindProducer producer =
-        new MongoDBFindProducer().withLimit("%message{limit}").withCollection("collection");
+  public void testDoRequestWithLimitExpresion() throws Exception {
+    MongoDBFindProducer producer = new MongoDBFindProducer().withLimit("%message{limit}").withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     msg.addMetadata("limit", LIMIT.toString());
     LifecycleHelper.initAndStart(producer);
     producer.request(msg, TIMEOUT.toMilliseconds());
     String result = msg.getContent();
-    if(!localTests) {
+    if (!localTests) {
       verify(collection, times(1)).find(new Document());
       verify(allIterable, times(1)).limit(LIMIT);
     }
@@ -206,4 +201,5 @@ public class  MongoDBFindProducerTest extends MongoDBCase {
             .withCollection("collection")
         );
   }
+
 }

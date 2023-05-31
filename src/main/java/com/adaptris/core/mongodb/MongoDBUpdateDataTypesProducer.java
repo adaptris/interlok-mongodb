@@ -1,12 +1,16 @@
 package com.adaptris.core.mongodb;
 
 import static com.mongodb.client.model.Filters.eq;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+
 import javax.validation.Valid;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
@@ -21,8 +25,8 @@ import com.mongodb.client.MongoIterable;
 import com.mongodb.client.result.UpdateResult;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import lombok.NoArgsConstructor;
 
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -30,11 +34,10 @@ import lombok.NoArgsConstructor;
  * @config mongodb-update-data-types-producer
  */
 @AdapterComponent
-@ComponentProfile(summary = "Update data types in MongoDB.", tag = "producer,mongodb",
-    recommended = {MongoDBConnection.class})
+@ComponentProfile(summary = "Update data types in MongoDB.", tag = "producer,mongodb", recommended = { MongoDBConnection.class })
 @XStreamAlias("mongodb-update-data-types-producer")
 @NoArgsConstructor
-@DisplayOrder(order = {"collection"})
+@DisplayOrder(order = { "collection" })
 public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
 
   @Valid
@@ -42,25 +45,25 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
 
   @Valid
   @XStreamImplicit
-  private List<ValueConverter> valueConverters = new ArrayList<>();
+  private List<ValueConverter<?>> valueConverters = new ArrayList<>();
 
   @AdvancedConfig
   private Integer batchSize;
 
   @Override
-  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String collectionName, long timeout,
-      AdaptrisMessage reply) throws ProduceException {
+  protected AdaptrisMessage doRequest(AdaptrisMessage msg, String collectionName, long timeout, AdaptrisMessage reply)
+      throws ProduceException {
     try {
       MongoCollection<Document> findCollection = getMongoDatabase().getCollection(collectionName);
       MongoCollection<Document> updateCollection = getMongoDatabase().getCollection(collectionName);
-      MongoIterable<Document> iterable =  findCollection.find(createFilter(msg));
-      if(getBatchSize() != null) {
+      MongoIterable<Document> iterable = findCollection.find(createFilter(msg));
+      if (getBatchSize() != null) {
         iterable.batchSize(getBatchSize());
       }
-      for(Document original : iterable){
+      for (Document original : iterable) {
         ObjectId id = original.getObjectId("_id");
         LinkedHashMap<String, Object> updates = new LinkedHashMap<>();
-        for(ValueConverter valueConverter : getValueConverters()){
+        for (ValueConverter<?> valueConverter : getValueConverters()) {
           updates.put(valueConverter.key(), valueConverter.convert(original));
         }
         Document result = new Document();
@@ -86,11 +89,11 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
     this.filter = filter;
   }
 
-  public List<ValueConverter> getValueConverters() {
+  public List<ValueConverter<?>> getValueConverters() {
     return valueConverters;
   }
 
-  public void setValueConverters(List<ValueConverter> valueConverters) {
+  public void setValueConverters(List<ValueConverter<?>> valueConverters) {
     this.valueConverters = valueConverters;
   }
 
@@ -107,8 +110,9 @@ public class MongoDBUpdateDataTypesProducer extends MongoDBProducer {
     return this;
   }
 
-  public MongoDBUpdateDataTypesProducer withTypeConverters(List<ValueConverter> valueConverters) {
+  public MongoDBUpdateDataTypesProducer withTypeConverters(List<ValueConverter<?>> valueConverters) {
     setValueConverters(valueConverters);
     return this;
   }
+
 }

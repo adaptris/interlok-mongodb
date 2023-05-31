@@ -1,14 +1,11 @@
 package com.adaptris.core.mongodb;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.bson.json.Converter;
-import org.bson.json.JsonWriterSettings;
-import org.bson.json.StrictJsonWriter;
-import org.bson.types.Decimal128;
-
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.bson.json.JsonWriterSettings;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  * @author mwarman
@@ -19,9 +16,8 @@ public class FlattenJsonOutputSettings implements JsonOutputSettings {
 
   private final transient JsonWriterSettings settings;
 
-  public FlattenJsonOutputSettings(){
-    settings = JsonWriterSettings.builder()
-        .objectIdConverter((value, writer) -> writer.writeString(value.toString()))
+  public FlattenJsonOutputSettings() {
+    settings = JsonWriterSettings.builder().objectIdConverter((value, writer) -> writer.writeString(value.toString()))
         .doubleConverter((value, writer) -> writer.writeNumber(value.toString()))
         .int32Converter((value, writer) -> writer.writeNumber(value.toString()))
         .int64Converter((value, writer) -> writer.writeNumber(value.toString()))
@@ -34,4 +30,5 @@ public class FlattenJsonOutputSettings implements JsonOutputSettings {
   public JsonWriterSettings settings() {
     return settings;
   }
+
 }

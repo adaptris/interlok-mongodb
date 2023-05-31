@@ -1,13 +1,14 @@
 package com.adaptris.core.mongodb;
 
-import com.adaptris.util.TimeInterval;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import org.junit.jupiter.api.Test;
+
+import com.adaptris.util.TimeInterval;
 
 /**
  * @author mwarman
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertNull;
 public class MongoDBConnectionTest {
 
   @Test
-  public void testConstructor(){
+  public void testConstructor() {
     MongoDBConnection connection = new MongoDBConnection();
     assertNull(connection.getConnectionUri());
     assertNull(connection.getDatabase());
@@ -53,6 +54,6 @@ public class MongoDBConnectionTest {
     } catch (Exception e) {
       // expected (unless you actually fire-up a MongoDB instance
     }
-
   }
+
 }

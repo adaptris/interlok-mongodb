@@ -16,16 +16,19 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
 import java.util.Arrays;
+
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -38,21 +41,18 @@ import com.mongodb.client.AggregateIterable;
 /**
  * @author mwarman
  */
-@SuppressWarnings("deprecation")
 public class MongoDBAggregateProducerTest extends MongoDBCase {
 
   private static final String PIPELINE = "[{ \"$group\" : { \"_id\" : \"$stars\", \"count\" : { \"$sum\" : 1 } } }]";
 
   @Override
-  @Before
-  public void onSetup() throws Exception{
-    if(localTests){
-      Document document = new Document("name", "Café Con Leche")
-          .append("stars", 3)
-          .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
-      Document document2 = new Document("name", "Fred's")
-          .append("stars", 1)
-          .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+  @BeforeEach
+  public void onSetup() throws Exception {
+    if (localTests) {
+      Document document = new Document("name", "Café Con Leche").append("stars", 3).append("categories",
+          Arrays.asList("Bakery", "Coffee", "Pastries"));
+      Document document2 = new Document("name", "Fred's").append("stars", 1).append("categories",
+          Arrays.asList("Bakery", "Coffee", "Pastries"));
       collection.insertMany(Arrays.asList(document, document2));
     } else {
 
@@ -79,11 +79,10 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
     assertEquals(parameter, producer.getPipeline());
   }
 
-
   @Test
-  public void testDoRequest() throws Exception{
-    MongoDBAggregateProducer producer = new MongoDBAggregateProducer()
-        .withPipeline(new StringPayloadDataInputParameter()).withCollection("collection");
+  public void testDoRequest() throws Exception {
+    MongoDBAggregateProducer producer = new MongoDBAggregateProducer().withPipeline(new StringPayloadDataInputParameter())
+        .withCollection("collection");
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(PIPELINE);
     LifecycleHelper.initAndStart(producer);
@@ -95,12 +94,8 @@ public class MongoDBAggregateProducerTest extends MongoDBCase {
 
   @Override
   protected Object retrieveObjectForSampleConfig() {
-    return new StandaloneProducer(
-        new MongoDBConnection("mongodb://localhost:27017", "database"),
-        new MongoDBAggregateProducer()
-        .withPipeline(new ConstantDataInputParameter(PIPELINE))
-            .withCollection("collection")
-        );
+    return new StandaloneProducer(new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBAggregateProducer().withPipeline(new ConstantDataInputParameter(PIPELINE)).withCollection("collection"));
   }
 
 }

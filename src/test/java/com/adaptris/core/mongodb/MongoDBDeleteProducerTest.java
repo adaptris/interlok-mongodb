@@ -16,13 +16,16 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.bson.Document;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -32,11 +35,10 @@ import com.mongodb.client.MongoCollection;
 /**
  * @author mwarman
  */
-@SuppressWarnings("deprecation")
 public class MongoDBDeleteProducerTest extends MongoDBCase {
 
   @Override
-  @Before
+  @BeforeEach
   public void onSetup() throws Exception {
     if (localTests) {
       Document document = new Document("key", 1);
@@ -46,13 +48,13 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduce() throws Exception{
+  public void testProduce() throws Exception {
     MongoDBDeleteProducer producer = new MongoDBDeleteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(0);
     } else {
       Mockito.verify(collection, Mockito.times(2)).deleteOne(Mockito.any());
@@ -61,13 +63,13 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceNoArray() throws Exception{
+  public void testProduceNoArray() throws Exception {
     MongoDBDeleteProducer producer = new MongoDBDeleteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(1);
     } else {
       Mockito.verify(collection, Mockito.times(1)).deleteOne(Mockito.any());
@@ -75,19 +77,16 @@ public class MongoDBDeleteProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-
   @Override
   protected Object retrieveObjectForSampleConfig() {
-    return new StandaloneProducer(
-        new MongoDBConnection("mongodb://localhost:27017", "database"),
-        new MongoDBDeleteProducer()
-            .withCollection("collection")
-        );
+    return new StandaloneProducer(new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBDeleteProducer().withCollection("collection"));
   }
 
-  private void assertRecordsArePresent(int expected){
+  private void assertRecordsArePresent(int expected) {
     MongoCollection<Document> collection = database.getCollection(COLLECTION);
     ArrayList<Document> results = collection.find().into(new ArrayList<>());
     assertEquals(expected, results.size());
   }
+
 }
