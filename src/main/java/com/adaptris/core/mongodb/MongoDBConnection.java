@@ -16,17 +16,16 @@
 
 package com.adaptris.core.mongodb;
 
+import java.sql.SQLException;
+
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AllowsRetriesConnection;
 import com.adaptris.core.CoreException;
-import com.adaptris.core.util.Args;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
 import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.event.ServerHeartbeatFailedEvent;
 import com.mongodb.event.ServerHeartbeatStartedEvent;
@@ -34,7 +33,9 @@ import com.mongodb.event.ServerHeartbeatSucceededEvent;
 import com.mongodb.event.ServerMonitorListener;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-import java.sql.SQLException;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * @author mwarman
@@ -43,20 +44,32 @@ import java.sql.SQLException;
 @XStreamAlias("mongodb-connection")
 @AdapterComponent
 @ComponentProfile(summary = "Connect to MongoDB,", tag = "connections,mongodb")
-@DisplayOrder(order = {"connectionUri", "database"})
+@DisplayOrder(order = { "connectionUri", "database" })
 public class MongoDBConnection extends AllowsRetriesConnection {
 
+  /**
+   * The URI of the database to connnect to
+   */
+  @NonNull
+  @Getter
+  @Setter
   private String connectionUri;
+  /**
+   * The name of the database to connnect to
+   */
+  @NonNull
+  @Getter
+  @Setter
   private String database;
 
   private transient MongoClient mongoClient;
   private transient MongoDatabase mongoDatabase;
 
-  public MongoDBConnection(){
-    //NOP
+  public MongoDBConnection() {
+    // NOP
   }
 
-  public MongoDBConnection(String connectionUri, String database){
+  public MongoDBConnection(String connectionUri, String database) {
     this();
     setConnectionUri(connectionUri);
     setDatabase(database);
@@ -64,7 +77,7 @@ public class MongoDBConnection extends AllowsRetriesConnection {
 
   @Override
   protected void prepareConnection() {
-    //NOP
+    // NOP
   }
 
   @Override
@@ -80,12 +93,12 @@ public class MongoDBConnection extends AllowsRetriesConnection {
 
   @Override
   protected void startConnection() {
-    //NOP
+    // NOP
   }
 
   @Override
   protected void stopConnection() {
-    //NOP
+    // NOP
   }
 
   @Override
@@ -107,29 +120,13 @@ public class MongoDBConnection extends AllowsRetriesConnection {
     return mongoDatabase;
   }
 
-
-  public String getConnectionUri() {
-    return connectionUri;
-  }
-
-  public void setConnectionUri(String connectionUri) {
-    this.connectionUri = Args.notNull(connectionUri, "Connection URI");
-  }
-
-  public String getDatabase() {
-    return database;
-  }
-
-  public void setDatabase(String database) {
-    this.database = Args.notNull(database, "Database");
-  }
-
   /**
    * <p>
    * Initiate a connection to the database.
    * </p>
    *
-   * @throws SQLException if connection fails after exhausting the specified number of retry attempts
+   * @throws SQLException
+   *           if connection fails after exhausting the specified number of retry attempts
    */
   private MongoClient attemptConnect() throws SQLException {
     int attemptCount = 0;
@@ -140,21 +137,21 @@ public class MongoDBConnection extends AllowsRetriesConnection {
     while (!connection.isConnected()) {
       attemptCount++;
 
-        if (logWarning(attemptCount)) {
-          log.warn("Connection attempt [{}] failed for {}", attemptCount, connectionUri);
-        }
+      if (logWarning(attemptCount)) {
+        log.warn("Connection attempt [{}] failed for {}", attemptCount, connectionUri);
+      }
 
-        if (connectionAttempts() != -1 && attemptCount >= connectionAttempts()) {
-          log.error("Failed to make connection to MongoDB instance");
-          throw new SQLException("Could not connect to " + connectionUri);
-        } else {
-          log.trace(createLoggingStatement(attemptCount));
-          try {
-            Thread.sleep(connectionRetryInterval());
-          } catch (InterruptedException e2) {
-            throw new SQLException(e2);
-          }
+      if (connectionAttempts() != -1 && attemptCount >= connectionAttempts()) {
+        log.error("Failed to make connection to MongoDB instance");
+        throw new SQLException("Could not connect to " + connectionUri);
+      } else {
+        log.trace(createLoggingStatement(attemptCount));
+        try {
+          Thread.sleep(connectionRetryInterval());
+        } catch (InterruptedException e2) {
+          throw new SQLException(e2);
         }
+      }
 
     }
     return mongoClient;
@@ -166,9 +163,7 @@ public class MongoDBConnection extends AllowsRetriesConnection {
 
     public MongoDBServerConnection(ServerAddress serverAddress) {
       try {
-        MongoClientOptions clientOptions = new MongoClientOptions.Builder()
-                .addServerMonitorListener(this)
-                .build();
+        MongoClientOptions clientOptions = new MongoClientOptions.Builder().addServerMonitorListener(this).build();
         client = new MongoClient(serverAddress, clientOptions);
       } catch (Exception ex) {
 
@@ -198,4 +193,5 @@ public class MongoDBConnection extends AllowsRetriesConnection {
       return client;
     }
   }
+
 }
