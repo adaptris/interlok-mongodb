@@ -18,8 +18,11 @@ package com.adaptris.core.mongodb;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.validation.Valid;
+
 import org.bson.Document;
+
 import com.adaptris.annotation.AdapterComponent;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;
@@ -27,42 +30,42 @@ import com.adaptris.core.AdaptrisMessage;
 import com.mongodb.client.MongoCollection;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+
 import lombok.NoArgsConstructor;
 
 /**
- * Producer that inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON objects.
+ * Producer that inserts JSON objects into MongoDB, if a JSON array is given the array will be split and inserted as individual JSON
+ * objects.
  *
  * @author mwarman
  * @config mongodb-write-producer
  */
 @AdapterComponent
-@ComponentProfile(summary = "Inserts JSON objects into MongoDB.", tag = "producer,mongodb",
-    recommended = {MongoDBConnection.class})
+@ComponentProfile(summary = "Inserts JSON objects into MongoDB.", tag = "producer,mongodb", recommended = { MongoDBConnection.class })
 @XStreamAlias("mongodb-write-producer")
-@DisplayOrder(order = {"collection"})
+@DisplayOrder(order = { "collection" })
 @NoArgsConstructor
 public class MongoDBWriteProducer extends MongoDBArrayProducer {
 
   @Valid
   @XStreamImplicit
-  private List<ValueConverter> valueConverters = new ArrayList<>();
-
+  private List<ValueConverter<?>> valueConverters = new ArrayList<>();
 
   @Override
-  public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message){
+  public void parseAndActionDocument(MongoCollection<Document> collection, AdaptrisMessage message) {
     Document document = Document.parse(message.getContent());
-    for(ValueConverter valueConverter : getValueConverters()){
+    for (ValueConverter<?> valueConverter : getValueConverters()) {
       document.put(valueConverter.key(), valueConverter.convert(document));
     }
     collection.insertOne(document);
     log.trace("Record Inserted");
   }
 
-  public List<ValueConverter> getValueConverters() {
+  public List<ValueConverter<?>> getValueConverters() {
     return valueConverters;
   }
 
-  public void setValueConverters(List<ValueConverter> valueConverters) {
+  public void setValueConverters(List<ValueConverter<?>> valueConverters) {
     this.valueConverters = valueConverters;
   }
 

@@ -16,11 +16,14 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
+
 import org.bson.Document;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -30,17 +33,16 @@ import com.mongodb.client.MongoCollection;
 /**
  * @author mwarman
  */
-@SuppressWarnings("deprecation")
 public class MongoDBWriteProducerTest extends MongoDBCase {
 
   @Test
-  public void testProduce() throws Exception{
+  public void testProduce() throws Exception {
     MongoDBWriteProducer producer = new MongoDBWriteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(2);
     } else {
       Mockito.verify(collection, Mockito.times(2)).insertOne(Mockito.any());
@@ -49,13 +51,13 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceNoArray() throws Exception{
+  public void testProduceNoArray() throws Exception {
     MongoDBWriteProducer producer = new MongoDBWriteProducer().withCollection(COLLECTION);
     producer.registerConnection(connection);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(1);
     } else {
       Mockito.verify(collection, Mockito.times(1)).insertOne(Mockito.any());
@@ -63,19 +65,16 @@ public class MongoDBWriteProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-
   @Override
   protected Object retrieveObjectForSampleConfig() {
-    return new StandaloneProducer(
-        new MongoDBConnection("mongodb://localhost:27017", "database"),
-        new MongoDBWriteProducer()
-            .withCollection("collection")
-        );
+    return new StandaloneProducer(new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBWriteProducer().withCollection("collection"));
   }
 
-  private void assertRecordsArePresent(int expected){
+  private void assertRecordsArePresent(int expected) {
     MongoCollection<Document> collection = database.getCollection(COLLECTION);
     ArrayList<Document> results = collection.find().into(new ArrayList<>());
     assertEquals(expected, results.size());
   }
+
 }

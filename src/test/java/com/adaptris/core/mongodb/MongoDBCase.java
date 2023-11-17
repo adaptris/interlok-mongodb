@@ -16,7 +16,7 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -28,8 +28,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.junit.scaffolding.ExampleProducerCase;
@@ -65,7 +65,7 @@ public abstract class MongoDBCase extends ExampleProducerCase {
     }
   }
 
-  @Before
+  @BeforeEach
   @SuppressWarnings("unchecked")
   public void setUp() throws Exception {
     if (localTests) {
@@ -95,7 +95,7 @@ public abstract class MongoDBCase extends ExampleProducerCase {
     // For sub-class to override
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (localTests) {
       clearData();
@@ -113,4 +113,5 @@ public abstract class MongoDBCase extends ExampleProducerCase {
       collection.deleteMany(Document.parse("{}"));
     }
   }
+
 }

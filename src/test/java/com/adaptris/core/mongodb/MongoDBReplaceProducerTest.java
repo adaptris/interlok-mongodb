@@ -16,16 +16,19 @@
 
 package com.adaptris.core.mongodb;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.StandaloneProducer;
@@ -39,18 +42,15 @@ import com.mongodb.client.model.ReplaceOptions;
 @SuppressWarnings("deprecation")
 public class MongoDBReplaceProducerTest extends MongoDBCase {
 
-
   @Override
-  @Before
+  @BeforeEach
   public void onSetup() throws Exception {
-    Document document = new Document("name", "Café Con Leche")
-        .append("stars", 3)
-        .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
-    Document document2 = new Document("name", "Fred's")
-        .append("stars", 1)
-        .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
+    Document document = new Document("name", "Café Con Leche").append("stars", 3).append("categories",
+        Arrays.asList("Bakery", "Coffee", "Pastries"));
+    Document document2 = new Document("name", "Fred's").append("stars", 1).append("categories",
+        Arrays.asList("Bakery", "Coffee", "Pastries"));
 
-    if(localTests){
+    if (localTests) {
       collection.insertMany(Arrays.asList(document, document2));
     } else {
 
@@ -58,7 +58,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceUpsertArrayNoData() throws Exception{
+  public void testProduceUpsertArrayNoData() throws Exception {
     clearData();
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
@@ -67,7 +67,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(2);
     } else {
       verifyUpdateCounts(2, true);
@@ -76,7 +76,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceUpsertNoArrayNoData() throws Exception{
+  public void testProduceUpsertNoArrayNoData() throws Exception {
     clearData();
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
@@ -85,7 +85,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(1);
     } else {
       verifyUpdateCounts(1, true);
@@ -94,7 +94,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceNoUpsertArrayNoData() throws Exception{
+  public void testProduceNoUpsertArrayNoData() throws Exception {
     clearData();
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
@@ -103,7 +103,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("[ {\"key\": 1},{\"key\": 2}]");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(0);
     } else {
       verifyUpdateCounts(2, false);
@@ -112,7 +112,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceNoUpsertNoArrayNoData() throws Exception{
+  public void testProduceNoUpsertNoArrayNoData() throws Exception {
     clearData();
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("key"));
@@ -121,7 +121,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"key\": 1}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(0);
     } else {
       verifyUpdateCounts(1, false);
@@ -130,7 +130,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceUpsertNoArrayData() throws Exception{
+  public void testProduceUpsertNoArrayData() throws Exception {
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("name"));
     producer.registerConnection(connection);
@@ -138,7 +138,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"name\": \"Fred's\", \"stars\": 2}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(2);
     } else {
       verifyUpdateCounts(1, true);
@@ -147,7 +147,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
   }
 
   @Test
-  public void testProduceUpsertNoArrayDataValueConverter() throws Exception{
+  public void testProduceUpsertNoArrayDataValueConverter() throws Exception {
     MongoDBReplaceProducer producer = new MongoDBReplaceProducer().withCollection(COLLECTION);
     producer.setFilterFields(Collections.singletonList("name"));
     producer.registerConnection(connection);
@@ -156,7 +156,7 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage("{\"name\": \"Fred's\", \"stars\": \"2\"}");
     LifecycleHelper.initAndStart(producer);
     producer.produce(msg);
-    if(localTests){
+    if (localTests) {
       assertRecordsArePresent(2);
     } else {
       verifyUpdateCounts(1, true);
@@ -164,19 +164,13 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
     LifecycleHelper.stopAndClose(producer);
   }
 
-
   @Override
   protected Object retrieveObjectForSampleConfig() {
-    return new StandaloneProducer(
-        new MongoDBConnection("mongodb://localhost:27017", "database"),
-        new MongoDBReplaceProducer()
-        .withUpsert(true)
-        .withFilterFields(Collections.singletonList("_id"))
-            .withCollection("collection")
-        );
+    return new StandaloneProducer(new MongoDBConnection("mongodb://localhost:27017", "database"),
+        new MongoDBReplaceProducer().withUpsert(true).withFilterFields(Collections.singletonList("_id")).withCollection("collection"));
   }
 
-  private void assertRecordsArePresent(int expected){
+  private void assertRecordsArePresent(int expected) {
     MongoCollection<Document> collection = database.getCollection(COLLECTION);
     ArrayList<Document> results = collection.find().into(new ArrayList<>());
     assertEquals(expected, results.size());
@@ -190,4 +184,5 @@ public class MongoDBReplaceProducerTest extends MongoDBCase {
       assertEquals(upsert, u.isUpsert());
     }
   }
+
 }
