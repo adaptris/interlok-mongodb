@@ -4,10 +4,10 @@ plugins {
   id "jacoco"
   // Manage optional dependencies in maven pom.
   id "nebula.optional-base" version "7.0.0"
-  id "com.github.spotbugs" version "6.0.21"
-  id "org.sonarqube" version "4.4.1.3373"
-  id "org.owasp.dependencycheck" version "10.0.3"
-  id "io.freefair.lombok" version "8.10"
+  id "com.github.spotbugs" version "6.0.27"
+  id "org.sonarqube" version "6.0.1.5171"
+  id "org.owasp.dependencycheck" version "11.1.1"
+  id "io.freefair.lombok" version "8.11"
 }
 
 ext {
@@ -33,7 +33,7 @@ ext {
   slf4jVersion = "2.0.16"
   log4j2Version = "2.13.2"
   mockitoVersion = "5.2.0"
-  jacksonVersion = "2.17.2"
+  jacksonVersion = "2.18.2"
 }
 
 ext.gitBranchNameOrTimestamp = { branchName ->
@@ -137,7 +137,7 @@ dependencies {
   implementation ("com.fasterxml.jackson.core:jackson-databind")
   annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion") { changing= true}
 
-  testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+  testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.11.4")
   testImplementation ("org.slf4j:slf4j-simple:$slf4jVersion")
   testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing= true }
   testImplementation ("org.mockito:mockito-core:$mockitoVersion")
