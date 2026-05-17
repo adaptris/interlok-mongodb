@@ -297,7 +297,7 @@ spotbugsMain {
 }
 
 dependencyCheck  {
-  suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml" ]
+  suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml", "$rootDir/gradle/owasp-exclude.xml" ]
   scanConfigurations = [ "api", "compileClasspath", "runtimeClasspath" ]
   formats = [ "HTML", "JUNIT" ]
   junitFailOnCVSS = 7.0
@@ -309,6 +309,11 @@ dependencyCheck  {
   }
   analyzers {
     assemblyEnabled=false
+    ossIndex {
+      username = System.getenv("OSS_INDEX_USERNAME")
+      password = System.getenv("OSS_INDEX_PASSWORD")
+      warnOnlyOnRemoteErrors = true
+    }
   }
 }
 
