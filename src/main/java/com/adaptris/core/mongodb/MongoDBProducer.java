@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.util.concurrent.TimeUnit;
 
 import static com.adaptris.core.AdaptrisMessageFactory.defaultIfNull;

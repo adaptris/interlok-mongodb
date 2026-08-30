@@ -16,7 +16,7 @@
 
 package com.adaptris.core.mongodb;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.bson.BsonDocument;
 import org.bson.Document;
 import com.adaptris.annotation.AdapterComponent;

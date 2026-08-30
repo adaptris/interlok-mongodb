@@ -2,7 +2,7 @@ package com.adaptris.core.mongodb;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.lang3.StringUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 

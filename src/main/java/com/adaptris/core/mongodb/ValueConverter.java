@@ -1,7 +1,7 @@
 package com.adaptris.core.mongodb;
 
 import java.lang.reflect.ParameterizedType;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.bson.Document;
 import com.adaptris.core.util.Args;
 
