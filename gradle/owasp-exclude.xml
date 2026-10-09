@@ -50,4 +50,26 @@
     <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty(\.http2|\.websocket)?/.+@10\.0\.26$</packageUrl>
     <cve>CVE-2026-2332</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+      mongodb-driver and mongodb-driver-core 3.12.14 are on the latest MongoDB 3.x release.
+      CVE-2026-88033 affects GridFS operations; this component does not use GridFS.
+      The fix requires the sync/reactive driver 5.11.1 or later, a major-version migration
+      outside the permitted minor/patch upgrades. This suppression does not remediate the dependency.
+      https://github.com/mongodb/mongo-java-driver/security/advisories/GHSA-556f-q76p-2vxq
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.mongodb/mongodb-driver(-core)?@3\.12\.14$</packageUrl>
+    <cve>CVE-2026-88033</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      json-lib 2.4 is inherited from interlok-json and is the latest net.sf.json-lib release.
+      No patched version exists for these coordinates. Remediation requires migrating to
+      org.kordamp.json:json-lib-core 3.1.0 or later, outside the permitted minor/patch upgrades.
+      This suppression does not remediate the unbalanced-comment denial-of-service vulnerability.
+      https://github.com/advisories/GHSA-wwcp-26wc-3fxm
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/net\.sf\.json-lib/json-lib@2\.4$</packageUrl>
+    <cve>CVE-2024-47855</cve>
+  </suppress>
 </suppressions>
